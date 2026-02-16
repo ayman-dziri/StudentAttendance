@@ -20,7 +20,6 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Entities
         public string TeacherId { get; set; } = null!;
 
         [BsonElement("groupId")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string GroupId { get; set; } = null!;
+        public string Group { get; set; } = null!;
     }
 }
