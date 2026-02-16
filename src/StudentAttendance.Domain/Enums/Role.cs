@@ -1,6 +1,9 @@
 ﻿namespace StudentAttendance.src.StudentAttendance.Domain.Enums
 {
-    public class Role
+    public enum Role
     {
+        ADMIN,
+        TEACHER,
+        STUDENT
     }
 }
