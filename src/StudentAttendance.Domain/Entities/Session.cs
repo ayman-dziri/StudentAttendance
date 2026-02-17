@@ -19,7 +19,7 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string TeacherId { get; set; } = null!;
 
-        [BsonElement("groupId")]
+        [BsonElement("group")]
         public string Group { get; set; } = null!;
     }
 }
