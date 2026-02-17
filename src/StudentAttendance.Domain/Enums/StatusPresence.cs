@@ -1,6 +1,10 @@
 ﻿namespace StudentAttendance.src.StudentAttendance.Domain.Enums
 {
-    public class StatusPresence
+    public enum StatusPresence
     {
+        PRESENT,
+        ABSENT,
+        JUSTIFIED,
+        LATE
     }
 }
