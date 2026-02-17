@@ -8,21 +8,19 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
         public static AbsenceDocument ToDocument(Absence u) => new()
         {
             Id = u.Id,
-
+            Status = u.Status,
+            StudentId = u.StudentId,
+            SessionId = u.SessionId,
+            JustificationDate = u.JustificationDate,
         };
 
         public static Absence ToDomain(AbsenceDocument d) => new()
         {
             Id = d.Id,
-            FirstName = d.FirstName,
-            LastName = d.LastName,
-            Email = d.Email,
-            Password = d.Password,
-            BirthDate = d.BirthDate,
-            CreatedAt = d.CreatedAt,
-            Role = d.Role,
-            IsActive = d.IsActive,
-            GroupId = d.GroupId,
+            Status = d.Status,
+            StudentId = d.StudentId,
+            SessionId = d.SessionId,
+            JustificationDate = d.JustificationDate,
         };
     }
 }
