@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Configuration;
+
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
