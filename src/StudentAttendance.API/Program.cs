@@ -1,5 +1,4 @@
-using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
-
+﻿using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +10,33 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ✅ Application service (nom complet)
+builder.Services.AddScoped<
+    StudentAttendance.src.StudentAttendance.Application.Interfaces.IAttendanceService,
+    StudentAttendance.src.StudentAttendance.Application.Interfaces.AttendanceService>();
+
+
+var useMocks = builder.Configuration.GetValue<bool>("UseMocks");
+
+if (useMocks)
+{
+    builder.Services.AddSingleton<
+        StudentAttendance.src.StudentAttendance.Domain.IRepositories.IAbsenceRepository,
+        StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks.FakeAbsenceRepository>();
+
+    builder.Services.AddSingleton<
+        StudentAttendance.src.StudentAttendance.Domain.IRepositories.ISessionRepository,
+        StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks.FakeSessionRepository>();
+}
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -20,6 +46,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
+
+
 app.UseAuthorization();
 app.MapControllers();
 
