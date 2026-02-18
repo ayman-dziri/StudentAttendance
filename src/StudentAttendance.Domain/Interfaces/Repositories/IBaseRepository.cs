@@ -1,5 +1,4 @@
-namespace StudentAttendance.src.StudentAttendance.Application.Interfaces.Repositories;
-
+namespace StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 /// <summary>
 /// Contrat générique pour les opérations CRUD communes à toutes les entités
 /// </summary>

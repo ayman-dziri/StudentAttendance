@@ -1,5 +1,5 @@
 using MongoDB.Driver;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
