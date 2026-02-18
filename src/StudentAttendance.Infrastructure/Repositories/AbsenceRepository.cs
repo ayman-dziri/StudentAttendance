@@ -1,5 +1,4 @@
 using MongoDB.Driver;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Collections;
@@ -52,15 +51,5 @@ public class AbsenceRepository : IAbsenceRepository
         var document = AbsenceMapper.ToDocument(absence);
         var filter = Builders<AbsenceDocument>.Filter.Eq(d => d.Id, document.Id);
         await _collection.ReplaceOneAsync(filter, document, cancellationToken: cancellationToken);
-    }
-
-    Task<List<Absence>> IAbsenceRepository.GetByIdAsync(string id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<Absence>> UpdateAsync(string id, Absence absence, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 }

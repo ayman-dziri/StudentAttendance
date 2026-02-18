@@ -4,8 +4,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Configuration;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces.Repositories;
-
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
 /// <summary>
