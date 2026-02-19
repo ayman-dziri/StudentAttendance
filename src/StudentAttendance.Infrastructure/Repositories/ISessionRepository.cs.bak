@@ -1,0 +1,11 @@
+﻿using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
+
+namespace StudentAttendance.src.StudentAttendance.Domain.IRepositories
+{
+    public interface ISessionRepository
+    {
+        Task<Session?> GetByIdAsync(string id);
+        Task UpdateAsync(Session session);
+    }
+}

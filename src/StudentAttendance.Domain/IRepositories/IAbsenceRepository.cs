@@ -1,0 +1,12 @@
+﻿using StudentAttendance.src.StudentAttendance.Domain.Entities;
+
+namespace StudentAttendance.src.StudentAttendance.Domain.IRepositories
+{
+    public interface IAbsenceRepository
+    {
+        Task<Absence?> GetByStudentAndSessionAsync(string studentId, string sessionId);
+        Task<List<Absence>> GetByStudentIdAsync(string studentId);
+        Task CreateAsync(Absence absence);
+        Task UpdateAsync(Absence absence);
+    }
+}
