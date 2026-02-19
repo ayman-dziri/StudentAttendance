@@ -26,5 +26,14 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mo
             if (idx >= 0) _sessions[idx] = session;
             return Task.CompletedTask;
         }
+        public Task ValidateAsync(string sessionId)
+        {
+            var s = _sessions.FirstOrDefault(x => x.Id == sessionId);
+            if (s is null) return Task.CompletedTask;
+
+            s.IsValidated = true;
+            return Task.CompletedTask;
+        }
+
     }
 }

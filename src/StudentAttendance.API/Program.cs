@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ Application service (nom complet)
+// Application service (nom complet)
 builder.Services.AddScoped<
     StudentAttendance.src.StudentAttendance.Application.Interfaces.IAttendanceService,
     StudentAttendance.src.StudentAttendance.Application.Interfaces.AttendanceService>();
@@ -31,11 +31,12 @@ if (useMocks)
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-        policy.AllowAnyOrigin()
+    options.AddPolicy("SwaggerCors", policy =>
+        policy.WithOrigins("http://localhost:54812")
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
+
 
 var app = builder.Build();
 
@@ -44,12 +45,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("SwaggerCors");
 
-app.UseHttpsRedirection();
-
-app.UseCors();
-
-
+//app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

@@ -6,5 +6,7 @@ namespace StudentAttendance.src.StudentAttendance.Domain.IRepositories
     {
         Task<Session?> GetByIdAsync(string id);
         Task UpdateAsync(Session session);
+        Task ValidateAsync(string sessionId);
+
     }
 }

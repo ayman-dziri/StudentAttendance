@@ -29,6 +29,9 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
             if (session.TeacherId != teacherId)
                 throw new Exception("Unauthorized");
 
+            if (session.IsValidated)
+                throw new Exception("Session already validated");
+
             foreach (var mark in request.Marks)
             {
                 var existing = await _absences.GetByStudentAndSessionAsync(mark.StudentId, sessionId);
@@ -51,7 +54,10 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
                     await _absences.UpdateAsync(existing);
                 }
             }
+
+            await _sessions.ValidateAsync(sessionId); //pour changer l'état d'invalide à valide
         }
+
 
         public async Task<List<AbsenceDto>> GetMyAbsencesAsync(string studentId)
         {

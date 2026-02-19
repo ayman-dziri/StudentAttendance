@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
-
+using StudentAttendance.src.StudentAttendance.Domain.IRepositories;
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
 	[ApiController]
@@ -9,11 +9,13 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
 	public class AttendanceController : ControllerBase
 	{
 		private readonly IAttendanceService _attendanceService;
+        private readonly ISessionRepository _sessions;
 
-		public AttendanceController(IAttendanceService attendanceService)
+        public AttendanceController(IAttendanceService attendanceService, ISessionRepository sessions)
 		{
 			_attendanceService = attendanceService;
-		}
+            _sessions = sessions;
+        }
 
 		// PROF: Valider une séance + marquer absences
 		// POST /api/attendance/teachers/{teacherId}/sessions/{sessionId}/validate
@@ -35,5 +37,13 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
 			var result = await _attendanceService.GetMyAbsencesAsync(studentId);
 			return Ok(result);
 		}
-	}
+        // PROF: Consulter les détails d'une séance
+        [HttpGet("sessions/{sessionId}")]
+        public async Task<IActionResult> GetSession(string sessionId)
+        {
+            var s = await _sessions.GetByIdAsync(sessionId);
+            if (s is null) return NotFound();
+            return Ok(s);
+        }
+    }
 }
