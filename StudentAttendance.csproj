@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
 	 <PackageReference Include="coverlet.collector" Version="8.0.0">
 	   <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	   <PrivateAssets>all</PrivateAssets>
@@ -18,6 +19,10 @@
 	  </PackageReference>
 	 <PackageReference Include="FluentAssertions" Version="8.8.0" />
 	 <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+=======
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+>>>>>>> origin/feature/scrum-12-attendance-validation
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="MongoDB.Bson" Version="3.6.0" />
