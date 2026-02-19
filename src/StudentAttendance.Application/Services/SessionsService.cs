@@ -1,23 +1,51 @@
 ﻿using FluentValidation;
-using StudentAttendance.src.StudentAttendance.Application.Intefaces;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Application.Mappers;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
-using System.Security.Cryptography.X509Certificates;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+
 
 namespace StudentAttendance.src.StudentAttendance.Application.Services;
 
 public class SessionsService : ISessionsService
 {
+    //Service Absence
+    //------------
+    private readonly IAbsenceService _absenceService;
+    //------------
+
+
     private readonly ISessionsRepository _sessionsRepository;
     private readonly ILogger<SessionsService> _logger;
-    private readonly IValidator<Session> _validator;
+    private readonly IValidator<CreateSessionRequest> _createValidator;
+    private readonly IValidator<UpdateSessionRequest> _updateValidator;
 
 
-    public async Task<List<Session>> GetAllSessionsAsync()
+    public SessionsService(
+        IAbsenceService absenceService,
+        ISessionsRepository sessionsRepository,
+        ILogger<SessionsService> logger,
+        IValidator<CreateSessionRequest> createValidator,
+        IValidator<UpdateSessionRequest> updateValidator)
+    {
+        _absenceService = absenceService;
+        _sessionsRepository = sessionsRepository;
+        _logger = logger;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
+
+
+
+    public async Task<List<SessionResponse>> GetAllSessionsAsync()
     {
         try
         {
             _logger.LogInformation("Getting all sessions");
-            return await _sessionsRepository.GetAllSessionsAsync();
+            var sessions = await _sessionsRepository.GetAllSessionsAsync();
+            return sessions.Select(SessionMapper.ToResponse).ToList();
         }
         catch (Exception ex)
         {
@@ -26,12 +54,13 @@ public class SessionsService : ISessionsService
         }
     }
 
-    public async Task<Session?> GetSessionsByIdAsync(string id)
+    public async Task<SessionResponse?> GetSessionsByIdAsync(string id)
     {
         try
         {
             _logger.LogInformation("Getting session by id: {SessionIdId}", id);
-            return await _sessionsRepository.GetSessionsByIdAsync(id);
+            var sessionbyid =  await _sessionsRepository.GetSessionsByIdAsync(id);
+            return sessionbyid == null ? null : SessionMapper.ToResponse(sessionbyid);
 
         }
         catch (Exception ex)
@@ -41,12 +70,13 @@ public class SessionsService : ISessionsService
         }
     }
 
-    public async Task<List<Session>> GetSessionsByTeacherIdAsync(string teacherId)
+    public async Task<List<SessionResponse>> GetSessionsByTeacherIdAsync(string teacherId)
     {
         try
         {
             _logger.LogInformation("Getting sessions by teacher id: {TeacherId}", teacherId);
-            return await _sessionsRepository.GetSessionsByTeacherIdAsync(teacherId);
+            var sessionbyteacher =  await _sessionsRepository.GetSessionsByTeacherIdAsync(teacherId);
+            return sessionbyteacher.Select(SessionMapper.ToResponse).ToList();
         }
         catch (Exception ex)
         {
@@ -55,12 +85,13 @@ public class SessionsService : ISessionsService
         }
     }
 
-    public async Task<List<Session>> GetSessionsByGroupName(string group)
+    public async Task<List<SessionResponse>> GetSessionsByGroupName(string group)
     {
         try
         {
             _logger.LogInformation("Getting sessions by group name: {GroupName}", group);
-            return await _sessionsRepository.GetSessionsByGroupName(group);
+            var sessionbygroup = await _sessionsRepository.GetSessionsByGroupName(group);
+            return sessionbygroup.Select(SessionMapper.ToResponse).ToList();
         }
         catch (Exception ex)
         {
@@ -69,13 +100,52 @@ public class SessionsService : ISessionsService
         }
     }
 
-    public async Task<Session> CreateSessionsAsync(Session session)
+
+    public async Task<List<User>> GetStudentsBySessionIdAsync(string sessionId)
+    {
+        try
+        {
+            _logger.LogInformation("Getting students by session id: {SessionId}", sessionId);
+           //var students = 
+                return await _sessionsRepository.GetStudentsBySessionIdAsync(sessionId);
+
+
+            //return students.Select(UserMapper.ToResponse).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting students by session id: {SessionId}", sessionId);
+            throw;
+        }
+    }
+
+    public async Task<User?> GetProfessurBySessionIdAsync(string sessionId)
+    {
+        try
+        {
+            _logger.LogInformation("Getting professor for session {SessionId}", sessionId);
+
+            //var teacher =
+            return await _sessionsRepository.GetProfessurBySessionIdAsync(sessionId);
+
+            // return teacher == null ? null : UserMapper.ToResponse(teacher);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting professor for session {SessionId}", sessionId);
+            throw;
+        }
+    }
+
+
+
+    public async Task<SessionResponse> CreateSessionsAsync(CreateSessionRequest sessionrequest, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation("Creating session");
 
-            var validationResult = await _validator.ValidateAsync(session);
+            var validationResult = await _createValidator.ValidateAsync(sessionrequest , cancellationToken);
 
             if (!validationResult.IsValid)
             {
@@ -83,7 +153,19 @@ public class SessionsService : ISessionsService
             }
             else
             {
-                return await _sessionsRepository.CreateSessionsAsync(session);
+                var session = SessionMapper.ToEntity(sessionrequest);
+                var created =  await _sessionsRepository.CreateSessionsAsync(session);
+
+                // Get students of that session group 
+                var students = await _sessionsRepository.GetStudentsBySessionIdAsync(created.Id);
+                var studentIds = students.Select(student => student.Id).ToList();
+
+
+
+                //implementation de creation de absence PRESENT pour les etudiants
+                await _absenceService.CreateAbsencesForSessionAsync(created.Id, studentIds, cancellationToken);
+
+                return SessionMapper.ToResponse(created);
             }
 
         }
@@ -94,11 +176,11 @@ public class SessionsService : ISessionsService
         }
     }
 
-    public async Task<Session> UpdateSessionsAsync(string id, Session session)
+    public async Task<SessionResponse?> UpdateSessionsAsync(string id, UpdateSessionRequest sessionrequest)
     {
         try
         {
-            _logger.LogInformation("Updating order with Id : {OrderId}", id);
+            _logger.LogInformation("Updating session with Id : {SessionId}", id);
 
             var existingSession = await _sessionsRepository.GetSessionsByIdAsync(id);
             if (existingSession == null)
@@ -108,7 +190,7 @@ public class SessionsService : ISessionsService
             }
             else
             {
-                var validationresult = await _validator.ValidateAsync(session);
+                var validationresult = await _updateValidator.ValidateAsync(sessionrequest);
 
                 if (!validationresult.IsValid)
                 {
@@ -116,10 +198,11 @@ public class SessionsService : ISessionsService
                 }
                 else
                 {
-                    session.Id = id;
-                    var updated = await _sessionsRepository.UpdateSessionsAsync(id, session);
+                    SessionMapper.MapUpdate(sessionrequest , existingSession);
 
-                    return updated ? session : null;
+                    var updated = await _sessionsRepository.UpdateSessionsAsync(id, existingSession);
+
+                    return updated ? SessionMapper.ToResponse(existingSession) : null;
                 }
             }
         }
@@ -137,9 +220,9 @@ public class SessionsService : ISessionsService
         {
             _logger.LogInformation("Deleting session with ID : {SessionId}", id);
 
-            var existingSession = await _sessionsRepository.GetSessionsByIdAsync(id);
+            var existingSession = await _sessionsRepository.ExistsSessionAsync(id);
 
-            if (existingSession == null)
+            if (!existingSession)
             {
                 _logger.LogWarning("Session with ID : {SessionId} not found", id);
                 return false;
@@ -155,6 +238,9 @@ public class SessionsService : ISessionsService
             throw;
         }
     }
+
+
+
 
 
 

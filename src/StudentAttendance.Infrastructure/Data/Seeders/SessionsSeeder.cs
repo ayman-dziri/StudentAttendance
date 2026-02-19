@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
-using StudentAttendance.src.StudentAttendance.Application.Intefaces;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
@@ -60,7 +60,8 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             StartTime = DateTime.UtcNow.AddDays(1),
             EndTime = DateTime.UtcNow.AddDays(1).AddHours(2),
             TeacherId = ObjectId.GenerateNewId().ToString(),
-            Group = "G1"
+            Group = "G1",
+            Statut = false
         },
 
         new Session
@@ -69,7 +70,8 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             StartTime = DateTime.UtcNow.AddDays(2),
             EndTime = DateTime.UtcNow.AddDays(2).AddHours(3),
             TeacherId = ObjectId.GenerateNewId().ToString(),
-            Group = "G2"
+            Group = "G2",
+            Statut = false
         },
 
         new Session
@@ -78,7 +80,28 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             StartTime = DateTime.UtcNow.AddDays(3),
             EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
             TeacherId = ObjectId.GenerateNewId().ToString(),
-            Group = "G1"
+            Group = "G1",
+            Statut = false
+        }
+        ,
+         new Session
+        {
+            Id = "SESSION_ID_1",
+            StartTime = DateTime.UtcNow.AddDays(3),
+            EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
+            TeacherId = ObjectId.GenerateNewId().ToString(),
+            Group = "G1",
+            Statut = false
+        } ,
+
+          new Session
+        {
+            Id = "SESSION_ID_2",
+            StartTime = DateTime.UtcNow.AddDays(3),
+            EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
+            TeacherId = ObjectId.GenerateNewId().ToString(),
+            Group = "G2",
+            Statut = false
         }
     };
     }
