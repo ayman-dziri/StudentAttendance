@@ -42,6 +42,17 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return doc == null ? null : SessionMapper.ToDomain(doc);
         }
 
+        public async Task<Session?> GetByIdAsync(string sessionId , CancellationToken  cancellationToken = default )
+        {
+
+            var doc = await _sessionsCollection
+            .Find(s => s.Id == sessionId)
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+            return doc == null ? null : SessionMapper.ToDomain(doc);
+        }
+
 
         public async Task<List<User>> GetStudentsBySessionIdAsync(string sessionId)
         {
@@ -119,7 +130,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             var doc = SessionMapper.ToDocument(session);
             await _sessionsCollection.InsertOneAsync(doc)
                 .ConfigureAwait(false);
-            return session;
+            return SessionMapper.ToDomain(doc);
         }
 
         public async Task<bool> UpdateSessionsAsync(string id, Session session)
@@ -144,6 +155,18 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 .ConfigureAwait(false);
             return count > 0;
         }
+
+
+        public async Task ValidateAsync(string sessionId, CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId);
+            var update = Builders<SessionDocument>.Update.Set(s => s.IsValidated, true);
+
+            await _sessionsCollection.UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+
 
 
 
