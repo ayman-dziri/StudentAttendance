@@ -31,7 +31,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         public Role Role { get; set; }
 
         [BsonElement("isActive")]
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
         [BsonElement("groupId")]
         [BsonRepresentation(BsonType.ObjectId)]
