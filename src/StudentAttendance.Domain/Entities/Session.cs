@@ -12,7 +12,10 @@
         public string TeacherId { get; set; } = null!;
 
         public string Group { get; set; } = null!;
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/feature/scrum-19-conflit-horaire
         public Boolean Statut { get; set; } = false;
     }
 }

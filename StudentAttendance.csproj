@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="MongoDB.Bson" Version="3.6.0" />
     <PackageReference Include="MongoDB.Driver" Version="3.6.0" />
+<<<<<<< HEAD
 
 	<PackageReference Include="FluentValidation" Version="11.11.0" />
 	  
@@ -30,6 +31,15 @@
     <PackageReference Include="xunit.assert" Version="2.9.3" />
     <PackageReference Include="xunit.extensibility.core" Version="2.9.3" />
    
+=======
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.3" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+>>>>>>> origin/feature/scrum-19-conflit-horaire
   </ItemGroup>
 
 </Project>

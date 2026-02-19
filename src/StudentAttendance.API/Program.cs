@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -11,6 +12,14 @@ using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
+=======
+using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Application.Services;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
+using StudentAttendance.src.StudentAttendance.API.Middlewares;
+>>>>>>> origin/feature/scrum-19-conflit-horaire
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,8 +62,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 
 
