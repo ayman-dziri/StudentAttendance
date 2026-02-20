@@ -35,15 +35,15 @@ public class ExceptionHandlingMiddleware
     {
         var (statusCode, message) = exception switch
         {
-<<<<<<< HEAD
+
             AbsenceNotFoundException => (HttpStatusCode.NotFound, exception.Message),
             AbsenceAlreadyJustifiedException => (HttpStatusCode.Conflict, exception.Message),
             InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
-=======
+
             ConflictScheduleException => (HttpStatusCode.Conflict, exception.Message),
-            InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
+            
             FormatException => (HttpStatusCode.BadRequest, "L'identifiant fourni n'est pas valide"),
->>>>>>> origin/feature/scrum-19-conflit-horaire
+
             _ => (HttpStatusCode.InternalServerError, "Une erreur interne est survenue")
         };
 

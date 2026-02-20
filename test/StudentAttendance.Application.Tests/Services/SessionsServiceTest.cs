@@ -26,6 +26,8 @@ public class SessionsServiceTest
     private readonly Mock<IValidator<CreateSessionRequest>> _createValidator = new();
     private readonly Mock<IValidator<UpdateSessionRequest>> _updateValidator = new();
 
+    private readonly Mock<ISessionConflictValidator> _sessionConflictValidator = new();
+
 
 
 
@@ -37,7 +39,9 @@ public class SessionsServiceTest
             _sessionsRepositoryMock.Object,
             _mockLogger.Object,
             _createValidator.Object,
-            _updateValidator.Object
+            _updateValidator.Object,
+            _sessionConflictValidator.Object
+
             );
     
 
