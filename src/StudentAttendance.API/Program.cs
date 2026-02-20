@@ -1,5 +1,7 @@
 using FluentValidation.AspNetCore;
+using StudentAttendance.src.StudentAttendance.Application.Intefaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 
@@ -9,13 +11,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Configure MongoDB settings
 builder.Services.Configure<MongoDbSettings>(
-    builder.Configuration.GetSection("MongoDBConfiguration"));
+    builder.Configuration.GetSection("MongoDbSettings"));
 
 // Register MongoDB client factory
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
 
 builder.Services.AddFluentValidationAutoValidation();
 //validator Services 
+
+
+
+// Register repositories
+builder.Services.AddScoped<ISessionsRepository, SessionsRepository>();
+
+// Register seeders
+builder.Services.AddScoped<SessionsSeeder>();
+
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -31,6 +42,18 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
+
+// Seed database
+using (var scope = app.Services.CreateScope())
+{
+    var seedersessions = scope.ServiceProvider.GetRequiredService<SessionsSeeder>();
+
+
+    await seedersessions.SeedAsync();
+
+
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -39,8 +62,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
+
+app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();

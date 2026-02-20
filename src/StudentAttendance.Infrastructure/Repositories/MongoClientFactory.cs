@@ -22,13 +22,13 @@ public class MongoClientFactory : IMongoClientFactory
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
 
-        var connectionString = _options.Value.ConnectionString
+        var ConnectionString = _options.Value.ConnectionString
             ?? throw new InvalidOperationException("MongoDB ConnectionString is not configured");
 
         var database = _options.Value.DatabaseName
             ?? throw new InvalidOperationException("MongoDB Database is not configured");
 
-        _client = new MongoClient(connectionString);
+        _client = new MongoClient(ConnectionString);
         _database = _client.GetDatabase(database);
 
     }
