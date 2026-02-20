@@ -24,6 +24,7 @@ public static class InfrastructureServiceRegistration
 
         // Repositories
         // Les repositories seront enregistrés ici au fur et à mesure
+        services.AddScoped<Domain.Repositories.IGroupRepository, Repositories.GroupRepository>();
 
         return services;
     }

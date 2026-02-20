@@ -1,3 +1,4 @@
+using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
 
@@ -5,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Injection des couches
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 
 // Controllers & Swagger
 builder.Services.AddControllers();
