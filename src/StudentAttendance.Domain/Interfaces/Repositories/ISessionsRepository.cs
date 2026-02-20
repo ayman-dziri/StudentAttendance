@@ -21,5 +21,7 @@ public interface ISessionsRepository
     Task<bool> DeleteSessionsAsync(string id);
 
     Task<bool> ExistsSessionAsync(string id);
+
+    Task ValidateAsync(string sessionId, CancellationToken cancellationToken = default);
 }
 

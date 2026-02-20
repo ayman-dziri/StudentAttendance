@@ -1,6 +1,7 @@
 ﻿using StudentAttendance.src.StudentAttendance.Domain.Entities;
-using StudentAttendance.src.StudentAttendance.Domain.IRepositories;
+
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 {
@@ -12,10 +13,10 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 
     public class AttendanceService : IAttendanceService
     {
-        private readonly ISessionRepository _sessions;
+        private readonly ISessionsRepository _sessions;
         private readonly IAbsenceRepository _absences;
 
-        public AttendanceService(ISessionRepository sessions, IAbsenceRepository absences)
+        public AttendanceService(ISessionsRepository sessions, IAbsenceRepository absences)
         {
             _sessions = sessions;
             _absences = absences;
@@ -23,7 +24,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 
         public async Task ValidateAndMarkAsync(string teacherId, string sessionId, MarkAbsencesRequest request)
         {
-            var session = await _sessions.GetByIdAsync(sessionId)
+            var session = await _sessions.GetSessionsByIdAsync(sessionId)
                 ?? throw new Exception("Session not found");
 
             if (session.TeacherId != teacherId)
@@ -38,7 +39,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 
                 if (existing is null)
                 {
-                    await _absences.CreateAsync(new Absence
+                    await _absences.InsertOneAsync(new Absence
                     {
                         Id = Guid.NewGuid().ToString(),
                         StudentId = mark.StudentId,

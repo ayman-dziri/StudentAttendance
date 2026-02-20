@@ -15,6 +15,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             EndTime = u.EndTime,
             TeacherId = u.TeacherId,
             Group = u.Group,
+            IsValidated = u.IsValidated
         };
 
 
@@ -27,6 +28,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             EndTime = d.EndTime,
             TeacherId = d.TeacherId,
             Group = d.Group,
+            IsValidated = d.IsValidated
         };
     }
 }

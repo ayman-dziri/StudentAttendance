@@ -64,4 +64,6 @@ public class AbsenceService : IAbsenceService
 
         _logger.LogInformation("Absence {AbsenceId} justifiée avec succès", absenceId);
     }
+
+    //method update absence status to ABSENT (hna tzidha a ibrahim melhaoui)
 }

@@ -78,4 +78,23 @@ public class AbsenceRepository : IAbsenceRepository
         var filter = Builders<AbsenceDocument>.Filter.Eq(d => d.Id, document.Id);
         await _collection.ReplaceOneAsync(filter, document, cancellationToken: cancellationToken);
     }
+
+    public async Task<Absence?> GetByStudentAndSessionAsync(string studentId, string sessionId)
+    {
+        var filter = Builders<AbsenceDocument>.Filter.And(
+            Builders<AbsenceDocument>.Filter.Eq(x => x.StudentId, studentId),
+            Builders<AbsenceDocument>.Filter.Eq(x => x.SessionId, sessionId)
+        );
+
+        var document = await _collection.Find(filter).FirstOrDefaultAsync();
+        return document is null ? null : AbsenceMapper.ToDomain(document);
+    }
+
+    public async Task<List<Absence>> GetByStudentIdAsync(string studentId)
+    {
+        var filter = Builders<AbsenceDocument>.Filter.Eq(x => x.StudentId, studentId);
+
+        var documents = await _collection.Find(filter).ToListAsync();
+        return documents.Select(AbsenceMapper.ToDomain).ToList();
+    }
 }

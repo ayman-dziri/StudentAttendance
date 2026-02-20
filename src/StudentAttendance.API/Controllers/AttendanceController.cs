@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
-using StudentAttendance.src.StudentAttendance.Domain.IRepositories;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
 	[ApiController]
@@ -9,9 +10,9 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
 	public class AttendanceController : ControllerBase
 	{
 		private readonly IAttendanceService _attendanceService;
-        private readonly ISessionRepository _sessions;
+        private readonly ISessionsRepository _sessions;
 
-        public AttendanceController(IAttendanceService attendanceService, ISessionRepository sessions)
+        public AttendanceController(IAttendanceService attendanceService, ISessionsRepository sessions)
 		{
 			_attendanceService = attendanceService;
             _sessions = sessions;
@@ -41,7 +42,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         [HttpGet("sessions/{sessionId}")]
         public async Task<IActionResult> GetSession(string sessionId)
         {
-            var s = await _sessions.GetByIdAsync(sessionId);
+            var s = await _sessions.GetSessionsByIdAsync(sessionId);
             if (s is null) return NotFound();
             return Ok(s);
         }
