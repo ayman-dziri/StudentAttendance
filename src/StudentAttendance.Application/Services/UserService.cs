@@ -23,6 +23,9 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
         {
             var user = UserMapper.ToEntity(userDto);
 
+            var passwordRequest = userDto.Password;
+            user.Password = _passwordHasher.Hash(passwordRequest);
+
             await _userRepository.AddAsync(user, ct);
         }
 

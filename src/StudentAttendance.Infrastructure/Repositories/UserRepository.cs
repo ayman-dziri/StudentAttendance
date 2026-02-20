@@ -39,10 +39,10 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
 
         public async Task<bool> UpdateUserAsync(User user, CancellationToken ct = default)
         {
-            var document = UserMapper.ToDocument(user); // on map l'entite USer vers le document UserDocument
+            var document = UserMapper.ToDocument(user); // on map l'entite User vers le document UserDocument
             var result = await _collection.ReplaceOneAsync(
                 filter: x => x.Id == document.Id, // condition pour trouver l'user qu'on souhaite le modifier
-                replacement: document, // on le modifie par ce nouveau objet
+                replacement: document, // on le remplace par ce nouveau objet
                 options: new ReplaceOptions { IsUpsert = false }, // on desactive cette option qui permet d'inserer cet objet au cas où il n'existe pas
                 cancellationToken: ct
             );

@@ -16,7 +16,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
             GroupId = c.GroupId,
         };
 
-        public static CreateUserRequest TocreateUserRequest(User u) => new()
+        public static CreateUserRequest ToCreateUserRequest(User u) => new()
         {
             FirstName = u.FirstName,
             LastName = u.LastName,
