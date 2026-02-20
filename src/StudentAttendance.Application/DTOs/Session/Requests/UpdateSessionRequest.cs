@@ -10,6 +10,6 @@
 
     public string Group { get; set; } = null!;
 
-    public Boolean Statut { get; set; } = false;
+    public bool IsValidated { get; set; } = false;
 }
 

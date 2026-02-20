@@ -7,6 +7,6 @@
     public string TeacherId { get; set; } = null!;
     public string Group { get; set; } = null!;
 
-    public Boolean Statut { get; set; } = false ;
+    public bool IsValidated { get; set; } = false ;
 }
 

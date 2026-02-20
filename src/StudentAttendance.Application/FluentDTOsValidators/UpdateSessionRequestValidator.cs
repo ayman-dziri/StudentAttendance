@@ -24,7 +24,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidato
                 .WithMessage("StartTime cannot be empty");
 
 
-            RuleFor(x => x.Statut)
+            RuleFor(x => x.IsValidated)
             .NotEmpty();
         }
     }

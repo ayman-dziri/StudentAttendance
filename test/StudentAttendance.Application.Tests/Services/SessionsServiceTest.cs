@@ -198,7 +198,7 @@ public class SessionsServiceTest
             EndTime = DateTime.UtcNow.AddHours(-1),
             TeacherId = "",
             Group = "",
-            Statut = false
+            IsValidated = false
 
         };
 
@@ -229,7 +229,7 @@ public class SessionsServiceTest
             EndTime = DateTime.UtcNow.AddHours(2),
             TeacherId = "t1",
             Group = "G1",
-            Statut = false
+            IsValidated = false
         };
 
         _createValidator
@@ -243,7 +243,7 @@ public class SessionsServiceTest
             EndTime = request.EndTime,
             TeacherId = request.TeacherId,
             Group = request.Group,
-            Statut = request.Statut
+            IsValidated = request.IsValidated
         };
 
         _sessionsRepositoryMock

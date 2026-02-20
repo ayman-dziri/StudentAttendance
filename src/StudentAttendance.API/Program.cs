@@ -1,13 +1,20 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
+using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Application.Services;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
+using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,15 +28,35 @@ builder.Services.Configure<MongoDbSettings>(
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
 
 builder.Services.AddFluentValidationAutoValidation();
+
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateSessionRequestValidator>();
 //validator Services 
+
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
 
 
 
 // Register repositories
 builder.Services.AddScoped<ISessionsRepository, SessionsRepository>();
 
+//register services 
+builder.Services.AddScoped<ISessionsService, SessionsService>();
+builder.Services.AddScoped<IAbsenceService, AbsenceService>();
+builder.Services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+
+
+
 // Register seeders
 builder.Services.AddScoped<SessionsSeeder>();
+
+
+//register Validators
+builder.Services.AddScoped<IValidator<CreateSessionRequest>, CreateSessionRequestValidator>();
+builder.Services.AddScoped<IValidator<UpdateSessionRequest>, UpdateSessionRequestValidator>();
 
 
 

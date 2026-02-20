@@ -16,7 +16,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
         EndTime = dto.EndTime,
         TeacherId = dto.TeacherId,
         Group = dto.Group,
-        Statut = dto.Statut,
+        IsValidated = dto.IsValidated,
     };
 
     //DTO updated -> Domain entité
@@ -26,7 +26,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
         session.EndTime = request.EndTime;
         session.TeacherId = request.TeacherId;
         session.Group = request.Group;
-        session.Statut = request.Statut;
+        session.IsValidated = request.IsValidated;
     }
 
 
@@ -38,7 +38,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
         EndTime = session.EndTime,
         TeacherId = session.TeacherId,
         Group = session.Group,
-        Statut = session.Statut,
+        IsValidated = session.IsValidated,
     };
 }
     
