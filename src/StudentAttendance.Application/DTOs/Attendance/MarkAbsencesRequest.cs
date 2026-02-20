@@ -9,4 +9,5 @@ namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance
     );
 
     public record MarkAbsencesRequest(List<StudentAbsenceMarkDto> Marks);
+
 }

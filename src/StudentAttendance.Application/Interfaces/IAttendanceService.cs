@@ -1,6 +1,7 @@
-﻿using StudentAttendance.src.StudentAttendance.Domain.Entities;
+﻿using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
+using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.IRepositories;
-using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 {
@@ -29,9 +30,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
             if (session.TeacherId != teacherId)
                 throw new Exception("Unauthorized");
 
-            if (session.IsValidated)
-                throw new Exception("Session already validated");
-
+            // Upsert absences
             foreach (var mark in request.Marks)
             {
                 var existing = await _absences.GetByStudentAndSessionAsync(mark.StudentId, sessionId);
@@ -55,20 +54,34 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
                 }
             }
 
-            await _sessions.ValidateAsync(sessionId); //pour changer l'état d'invalide à valide
+            //  Validation session (si tu l'as déjà ajouté)
+            await _sessions.ValidateAsync(sessionId);
         }
-
 
         public async Task<List<AbsenceDto>> GetMyAbsencesAsync(string studentId)
         {
             var absences = await _absences.GetByStudentIdAsync(studentId);
 
-            return absences.Select(a => new AbsenceDto(
-                a.Id,
-                a.SessionId,
-                a.Status,
-                a.JustificationDate
-            )).ToList();
+            //  Ici : filtrer seulement Absent / Retard / Justifié
+            // Option 1 (si ton enum a PRESENT): exclure PRESENT
+            // var filtered = absences.Where(a => a.Status != StatusPresence.PRESENT);
+
+            // Option 2 (recommandée) : explicite
+            var filtered = absences.Where(a =>
+                a.Status == StatusPresence.ABSENT ||
+                a.Status == StatusPresence.LATE ||
+                a.Status == StatusPresence.JUSTIFIED
+            );
+
+            // Mapping record AbsenceDto (constructeur)
+            return filtered
+                .Select(a => new AbsenceDto(
+                    a.Id,
+                    a.SessionId,
+                    a.Status,
+                    a.JustificationDate
+                ))
+                .ToList();
         }
     }
 }
