@@ -5,26 +5,37 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
 {
     public class UserMapper
     {
-        public static User ToEntity(CreateUserRequest request) => new()
+        public static User ToEntity(CreateUserRequest c) => new()
         {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Email = request.Email,
-            Password = request.Password,
-            BirthDate = request.BirthDate,
-            Role = request.Role,
-            GroupId = request.GroupId,
+            FirstName = c.FirstName,
+            LastName = c.LastName,
+            Email = c.Email,
+            Password = c.Password,
+            BirthDate = c.BirthDate,
+            Role = c.Role,
+            GroupId = c.GroupId,
         };
 
-        public static CreateUserRequest TocreateUserRequest(User user) => new()
+        public static CreateUserRequest TocreateUserRequest(User u) => new()
         {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            Password = user.Password,
-            BirthDate = user.BirthDate,
-            Role = user.Role,
-            GroupId = user.GroupId,
+            FirstName = u.FirstName,
+            LastName = u.LastName,
+            Email = u.Email,
+            Password = u.Password,
+            BirthDate = u.BirthDate,
+            Role = u.Role,
+            GroupId = u.GroupId,
+        };
+
+        // *******************************************************
+
+        public static User ToEntity(UpdateUserRequest up) => new()
+        {
+            FirstName = up.FirstName,
+            LastName = up.LastName,
+            Email = up.Email,
+            BirthDate = up.BirthDate,
+            GroupId = up.GroupId,
         };
     }
 }
