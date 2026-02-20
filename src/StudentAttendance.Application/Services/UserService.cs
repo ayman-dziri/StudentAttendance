@@ -46,13 +46,13 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
         public async Task<List<User>> GetAllUsersAsync(CancellationToken ct = default)
             => await _userRepository.GetUsersAsync(ct);
 
-        public async Task<bool> UpdateUserAsync(UpdateUserRequest updateUser, CancellationToken ct = default)
+        public async Task<bool> UpdateUserAsync(string id, UpdateUserRequest updateUser, CancellationToken ct = default)
         {
             if (updateUser is null) throw new ValidationException("Update data is required");
 
             var user = UserMapper.ToEntity(updateUser);
 
-            var updated = await _userRepository.UpdateUserAsync(user, ct);
+            var updated = await _userRepository.UpdateUserAsync(id, user, ct);
             if (!updated) throw new Exception("Failed ti update user");
 
             return updated;
