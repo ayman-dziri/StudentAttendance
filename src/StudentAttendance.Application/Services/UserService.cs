@@ -33,29 +33,36 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             await _userRepository.AddAsync(user, ct); // enregistrement
         }
 
-        public async Task<User?> GetByIdAsync(string id, CancellationToken ct = default)
+        public async Task<UserDetailsResponse?> GetByIdAsync(string id, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(id)) throw new ValidationException("User id is required");
 
-            var user = await _userRepository.GetUserByIdAsync(id, ct);
+            var user = await _userRepository.GetUserByIdAsync(id, ct); // appel du repository
             if(user is null)    throw new NotFoundException($"User with id : '{id}' not found");
 
-            return user;
+            var userDetail = UserMapper.ToUserDetail(user); // mapping vers DTO pour envoyer l'user sans password
+            return userDetail;
         }
 
-        public async Task<List<User>> GetAllUsersAsync(CancellationToken ct = default)
-            => await _userRepository.GetUsersAsync(ct);
+        public async Task<List<UserDetailsResponse>> GetAllUsersAsync(CancellationToken ct = default)
+        {
+            var users = await _userRepository.GetUsersAsync(ct);
+            if (users is null) throw new NotFoundException("users not found");
+
+            return users.Select(UserMapper.ToUserDetail).ToList();
+        }
 
         public async Task<bool> UpdateUserAsync(string id, UpdateUserRequest updateUser, CancellationToken ct = default)
         {
+            if (string.IsNullOrWhiteSpace(id))  throw new ValidationException("User id is required.");
             if (updateUser is null) throw new ValidationException("Update data is required");
 
             var user = UserMapper.ToEntity(updateUser);
 
-            var updated = await _userRepository.UpdateUserAsync(id, user, ct);
-            if (!updated) throw new Exception("Failed ti update user");
+            var IsUpdated = await _userRepository.UpdateUserAsync(id, user, ct);
+            if (!IsUpdated) throw new NotFoundException($"User with id : '{id}', not found");
 
-            return updated;
+            return IsUpdated;
         }
 
         public async Task<bool> DeleteUserAsync(string id, CancellationToken ct = default)

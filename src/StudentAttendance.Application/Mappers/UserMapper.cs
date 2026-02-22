@@ -33,9 +33,23 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
         {
             FirstName = up.FirstName,
             LastName = up.LastName,
-            Email = up.Email,
             BirthDate = up.BirthDate,
             GroupId = up.GroupId,
+        };
+
+        // ********************************************************
+
+        public static UserDetailsResponse ToUserDetail(User u) => new()
+        {
+            Id = u.Id,
+            FirstName = u.FirstName,
+            LastName = u.LastName,
+            Email = u.Email,
+            BirthDate = u.BirthDate,
+            CreatedAt = u.CreatedAt,
+            Role = u.Role,
+            IsActive = u.IsActive,
+            GroupId = u.GroupId,
         };
     }
 }

@@ -8,8 +8,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.DTOs.user
 
         public string LastName { get; set; } = null!;
 
-        public string Email { get; set; } = null!;
-
         public DateOnly BirthDate { get; set; }
 
         public string? GroupId { get; set; }
