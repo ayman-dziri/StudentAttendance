@@ -4,7 +4,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 
 
 
-namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
+namespace StudentAttendance.src.StudentAttendance.Application.Interfaces.Services
 {
     public interface IAttendanceService
     {
