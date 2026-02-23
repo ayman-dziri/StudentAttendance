@@ -25,6 +25,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             if (userDto is null) throw new ValidationException("User data is required"); // si l'objet userDto entré par l'utilisateur est null on lance une exception
 
             var user = UserMapper.ToEntity(userDto); // on map le dto entré vers l'entité
+            user.GenerateEmail(); // on appel l'email generé pour l'enregistrer dans la DB
             if (string.IsNullOrWhiteSpace(userDto.Password)) throw new ValidationException("Password is required");
 
             var passwordRequest = userDto.Password;
@@ -72,5 +73,15 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
 
             return deleted;
         }
+
+        public async Task<User?> GetUserByEmail(string email, CancellationToken ct = default)
+        {
+            var user = _userRepository.GetUserByEmail(email, ct);
+            if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("the field email is required");
+            if(user is null)    throw new NotFoundException($" User with email : '{email}' was not found.");
+
+            return await user;
+        }
+
     }
 }

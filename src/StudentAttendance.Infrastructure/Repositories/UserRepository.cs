@@ -26,7 +26,6 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
         public async Task<User?> GetUserByIdAsync(string id,  CancellationToken ct = default)
         {
             var document = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync(ct); // on cherche l'objet si son id == l'id entré dans le parametre
-            if (document is null)   return null;
 
             return UserMapper.ToDomain(document);
         }
@@ -71,6 +70,13 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
         {
             var result = await _collection.DeleteOneAsync(x => x.Id == id); // on supprime d'apres cette condition
             return result.DeletedCount > 0;
+        }
+
+        public async Task<User?> GetUserByEmail(string email, CancellationToken ct = default)
+        {
+            var user = await _collection.Find(x => x.Email == email).FirstOrDefaultAsync(ct);
+
+            return UserMapper.ToDomain(user);
         }
     }
 }

@@ -9,5 +9,6 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Interfaces
         Task<List<User>> GetUsersAsync(CancellationToken ct = default);
         Task<bool> UpdateUserAsync(string id, User user, CancellationToken ct = default);
         Task<bool> DeleteUserAsync(string id, CancellationToken ct = default);
+        Task<User?> GetUserByEmail(string email, CancellationToken ct = default);
     }
 }

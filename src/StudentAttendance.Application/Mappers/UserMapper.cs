@@ -9,7 +9,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
         {
             FirstName = c.FirstName,
             LastName = c.LastName,
-            Email = c.Email,
             Password = c.Password,
             BirthDate = c.BirthDate,
             Role = c.Role,
@@ -20,7 +19,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
         {
             FirstName = u.FirstName,
             LastName = u.LastName,
-            Email = u.Email,
             Password = u.Password,
             BirthDate = u.BirthDate,
             Role = u.Role,
