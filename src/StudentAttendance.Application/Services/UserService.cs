@@ -36,10 +36,10 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
 
         public async Task<UserDetailsResponse?> GetByIdAsync(string id, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(id)) throw new ValidationException("User id is required");
+            if (string.IsNullOrWhiteSpace(id)) throw new ValidationException("User id is required"); // verifier si l'id est bien saisie
 
             var user = await _userRepository.GetUserByIdAsync(id, ct); // appel du repository
-            if(user is null)    throw new NotFoundException($"User with id : '{id}' not found");
+            if(user is null)    throw new NotFoundException($"User with id : '{id}' not found"); // lever une excepiton si l'user n'existe pas dans la DB
 
             var userDetail = UserMapper.ToUserDetail(user); // mapping vers DTO pour envoyer l'user sans password
             return userDetail;
@@ -50,7 +50,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             var users = await _userRepository.GetUsersAsync(ct);
             if (users is null) throw new NotFoundException("users not found");
 
-            return users.Select(UserMapper.ToUserDetail).ToList();
+            return users.Select(UserMapper.ToUserDetail).ToList(); // mapper tous les users en dto puis l'enregistrer dans une liste
         }
 
         public async Task<bool> UpdateUserAsync(string id, UpdateUserRequest updateUser, CancellationToken ct = default)

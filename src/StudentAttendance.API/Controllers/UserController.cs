@@ -37,7 +37,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser([FromRoute] string id , CancellationToken ct)
         {
-            var user = await _userService.GetByIdAsync(id);
+            var user = await _userService.GetByIdAsync(id, ct);
 
             return Ok(user);
         }
