@@ -2,9 +2,9 @@
 {
     public enum StatusPresence
     {
-        PRESENT,
-        ABSENT,
-        JUSTIFIED,
-        LATE
+        PRESENT = 1,
+        ABSENT = 2,
+        JUSTIFIED = 3,
+        LATE = 4
     }
 }

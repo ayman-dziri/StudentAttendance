@@ -1,7 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
+using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Configuration;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
@@ -21,6 +24,8 @@ public static class InfrastructureServiceRegistration
 
         services.AddSingleton(mongoSettings);
         services.AddSingleton<StudentAttendanceDbContext>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
         // Repositories
         // Les repositories seront enregistrés ici au fur et à mesure
@@ -28,4 +33,4 @@ public static class InfrastructureServiceRegistration
 
         return services;
     }
-}
+} 

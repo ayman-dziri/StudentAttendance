@@ -1,5 +1,10 @@
 using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces;
+using StudentAttendance.src.StudentAttendance.Application.Services;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,8 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 // Controllers & Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
