@@ -23,18 +23,26 @@ public class SessionsService : ISessionsService
     private readonly IValidator<UpdateSessionRequest> _updateValidator;
 
 
+    //Injection de Conflit d'horaire
+    //------------------
+    private readonly ISessionConflictValidator _conflictValidator;
+    //------------------
+
+
     public SessionsService(
         IAbsenceService absenceService,
         ISessionsRepository sessionsRepository,
         ILogger<SessionsService> logger,
         IValidator<CreateSessionRequest> createValidator,
-        IValidator<UpdateSessionRequest> updateValidator)
+        IValidator<UpdateSessionRequest> updateValidator,
+        ISessionConflictValidator conflictValidator)
     {
         _absenceService = absenceService;
         _sessionsRepository = sessionsRepository;
         _logger = logger;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _conflictValidator = conflictValidator;
     }
 
 
@@ -154,6 +162,9 @@ public class SessionsService : ISessionsService
             else
             {
                 var session = SessionMapper.ToEntity(sessionrequest);
+
+                await _conflictValidator.ValidateNoConflictAsync(session, excludeSessionId: null, cancellationToken);
+
                 var created =  await _sessionsRepository.CreateSessionsAsync(session);
 
                 // Get students of that session group 
@@ -199,6 +210,8 @@ public class SessionsService : ISessionsService
                 else
                 {
                     SessionMapper.MapUpdate(sessionrequest , existingSession);
+
+                    await _conflictValidator.ValidateNoConflictAsync(existingSession, excludeSessionId: id , CancellationToken.None);
 
                     var updated = await _sessionsRepository.UpdateSessionsAsync(id, existingSession);
 

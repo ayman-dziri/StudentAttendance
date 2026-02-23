@@ -1,37 +1,35 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
+using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Application.Services;
 using StudentAttendance.src.StudentAttendance.Application.Services;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
+﻿using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-=======
-using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
-using StudentAttendance.src.StudentAttendance.Application.Services;
-using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-using StudentAttendance.src.StudentAttendance.API.Middlewares;
->>>>>>> origin/feature/scrum-19-conflit-horaire
-=======
-﻿using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
->>>>>>> origin/feature/scrum-12-attendance-validation
+using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Injection des couches
+
 builder.Services.AddInfrastructure(builder.Configuration);
 
 
-// Configure MongoDB settings
+
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
@@ -59,6 +57,8 @@ builder.Services.AddScoped<AbsencesSeeder>();
 // Services Application
 builder.Services.AddScoped<IAbsenceService, AbsenceService>();
 builder.Services.AddScoped<ISessionsService, SessionsService>();
+builder.Services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
+
 
 
 // Controllers & Swagger
@@ -66,8 +66,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
-<<<<<<< HEAD
-=======
+
 
 // Application service (nom complet)
 builder.Services.AddScoped<
@@ -75,18 +74,18 @@ builder.Services.AddScoped<
     StudentAttendance.src.StudentAttendance.Application.Interfaces.AttendanceService>();
 
 
-var useMocks = builder.Configuration.GetValue<bool>("UseMocks");
+//var useMocks = builder.Configuration.GetValue<bool>("UseMocks");
 
-if (useMocks)
-{
-    builder.Services.AddSingleton<
-        StudentAttendance.src.StudentAttendance.Domain.IRepositories.IAbsenceRepository,
-        StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks.FakeAbsenceRepository>();
+//if (useMocks)
+//{
+//    builder.Services.AddSingleton<
+//        StudentAttendance.src.StudentAttendance.Domain.IRepositories.IAbsenceRepository,
+//        StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks.FakeAbsenceRepository>();
 
-    builder.Services.AddSingleton<
-        StudentAttendance.src.StudentAttendance.Domain.IRepositories.ISessionRepository,
-        StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks.FakeSessionRepository>();
-}
+//    builder.Services.AddSingleton<
+//        StudentAttendance.src.StudentAttendance.Domain.IRepositories.ISessionRepository,
+//        StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks.FakeSessionRepository>();
+//}
 
 builder.Services.AddCors(options =>
 {
@@ -97,7 +96,7 @@ builder.Services.AddCors(options =>
 });
 
 
->>>>>>> origin/feature/scrum-12-attendance-validation
+
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

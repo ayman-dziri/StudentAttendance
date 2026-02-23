@@ -3,13 +3,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 
-
-using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-
-
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
+
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
 /// <summary>
@@ -33,6 +29,8 @@ public static class InfrastructureServiceRegistration
         // Les repositories seront enregistrés ici au fur et à mesure
         services.AddScoped<IAbsenceRepository, AbsenceRepository>();
         services.AddScoped<ISessionsRepository, SessionsRepository>();
+        
+
 
 
         return services;

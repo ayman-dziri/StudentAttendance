@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
+using StudentAttendance.src.StudentAttendance.Application.Exceptions;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Services;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
@@ -21,6 +22,8 @@ public class SessionsServiceTest
 
     private readonly Mock<IAbsenceService> _absenceService = new();
 
+    private readonly Mock<ISessionConflictValidator> _conflictValidator = new();
+
     private readonly Mock<ILogger<SessionsService>> _mockLogger = new();
 
     private readonly Mock<IValidator<CreateSessionRequest>> _createValidator = new();
@@ -37,7 +40,8 @@ public class SessionsServiceTest
             _sessionsRepositoryMock.Object,
             _mockLogger.Object,
             _createValidator.Object,
-            _updateValidator.Object
+            _updateValidator.Object,
+            _conflictValidator.Object
             );
     
 
@@ -56,7 +60,7 @@ public class SessionsServiceTest
                     Group = "G1" ,
                     StartTime = DateTime.UtcNow ,
                     EndTime = DateTime.UtcNow.AddHours(1),
-                    Statut = false 
+                    IsValidated = false 
                 } ,
                  new Session {
                     Id = "s2" ,
@@ -64,7 +68,7 @@ public class SessionsServiceTest
                     Group = "G2" ,
                     StartTime = DateTime.UtcNow ,
                     EndTime = DateTime.UtcNow.AddHours(2) ,
-                    Statut = false
+                    IsValidated = false
                 }
             });
 
@@ -111,7 +115,7 @@ public class SessionsServiceTest
                 Group = "G1",
                 StartTime = DateTime.UtcNow,
                 EndTime = DateTime.UtcNow.AddHours(1),
-                Statut = false
+                IsValidated = false
             });
 
 
@@ -140,7 +144,7 @@ public class SessionsServiceTest
                         Group = "G1",
                         StartTime = DateTime.UtcNow,
                         EndTime = DateTime.UtcNow.AddHours(1),
-                        Statut = false
+                        IsValidated = false
                     }
             });
 
@@ -169,7 +173,7 @@ public class SessionsServiceTest
                         Group = "G1",
                         StartTime = DateTime.UtcNow,
                         EndTime = DateTime.UtcNow.AddHours(1) ,
-                        Statut = false
+                        IsValidated = false
                     }
             });
 
@@ -194,7 +198,7 @@ public class SessionsServiceTest
             EndTime = DateTime.UtcNow.AddHours(-1),
             TeacherId = "",
             Group = "",
-            Statut = false
+            IsValidated = false
 
         };
 
@@ -215,6 +219,64 @@ public class SessionsServiceTest
         _sessionsRepositoryMock.Verify(r => r.CreateSessionsAsync(It.IsAny<Session>()), Times.Never);
     }
 
+
+    [Fact]
+    public async Task CreateSessionsAsync_WhenNoCOnflict_ShouldCallValidator_ThenCreate()
+    {
+        var request = new CreateSessionRequest
+        {
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow.AddHours(2),
+            TeacherId = "t1",
+            Group = "G1",
+            IsValidated = false
+        };
+
+        _createValidator
+            .Setup(v => v.ValidateAsync(request, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult()); // valid
+
+        _conflictValidator.Setup(v => v.ValidateNoConflictAsync(It.IsAny<Session>(), null, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+
+        var created = new Session
+        {
+            Id = "session1",
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            TeacherId = request.TeacherId,
+            Group = request.Group
+        };
+
+        _sessionsRepositoryMock
+         .Setup(r => r.CreateSessionsAsync(It.IsAny<Session>()))
+         .ReturnsAsync(created);
+
+        _sessionsRepositoryMock
+       .Setup(r => r.GetStudentsBySessionIdAsync("session1"))
+       .ReturnsAsync(new List<User> { new User { Id = "student1" } });
+
+        var sut = CreateSut();
+
+        var result = await sut.CreateSessionsAsync(request);
+
+        result.Id.Should().Be("session1");
+
+        _conflictValidator.Verify(v =>
+            v.ValidateNoConflictAsync(
+                It.Is<Session>(s => s.TeacherId == "t1" && s.Group == "G1"),
+                null,
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+
+    
+
+
+
+
     [Fact]
     public async Task CreateSessionsAsync_WhenValid_ShouldCreateSession_AndCreateAbsences()
     {
@@ -225,7 +287,7 @@ public class SessionsServiceTest
             EndTime = DateTime.UtcNow.AddHours(2),
             TeacherId = "t1",
             Group = "G1",
-            Statut = false
+            IsValidated = false
         };
 
         _createValidator
@@ -239,7 +301,7 @@ public class SessionsServiceTest
             EndTime = request.EndTime,
             TeacherId = request.TeacherId,
             Group = request.Group,
-            Statut = request.Statut
+            IsValidated = request.IsValidated
         };
 
         _sessionsRepositoryMock
@@ -287,10 +349,45 @@ public class SessionsServiceTest
         result.Should().BeNull();
     }
 
+    [Fact]
+    public async Task UpdateSessionAsync_WhenCOnflict_SHouldThrow_AndNotUpdate()
+    {
+        var id = "s1";
+        var existing = new Session
+        {
+            Id = id,
+            TeacherId = "t1",
+            Group = "G1",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow.AddHours(2),
+            IsValidated = false
+        };
+
+        _sessionsRepositoryMock
+            .Setup(r => r.GetSessionsByIdAsync(id))
+            .ReturnsAsync(existing);
+
+        _updateValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<UpdateSessionRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        _conflictValidator
+            .Setup(v => v.ValidateNoConflictAsync(It.IsAny<Session>(), id, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ConflictScheduleException("Conflict"));
+
+        var sut = CreateSut();
+
+        Func<Task> act = () => sut.UpdateSessionsAsync(id, new UpdateSessionRequest());
+
+        await act.Should().ThrowAsync<ConflictScheduleException>();
+
+        _sessionsRepositoryMock.Verify(r => r.UpdateSessionsAsync(It.IsAny<string>(), It.IsAny<Session>()), Times.Never);
+    }
+
     // TODO: UpdateSessionsAsync_WhenInvalid_ShouldThrowValidationException
     // TODO: UpdateSessionsAsync_WhenValid_ShouldUpdateAndReturnResponse
 
-  
+
 
     [Fact]
     public async Task DeleteSessionsAsync_WhenNotExists_ShouldReturnFalse()

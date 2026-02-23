@@ -16,7 +16,6 @@ public interface ISessionsService
     Task<SessionResponse> UpdateSessionsAsync(string id, UpdateSessionRequest sessionrequest);
     Task<bool> DeleteSessionsAsync(string id);
 
-
     Task<List<User>> GetStudentsBySessionIdAsync(string sessionId);
     Task<User?> GetProfessurBySessionIdAsync(string sessionId);
 

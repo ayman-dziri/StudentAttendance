@@ -24,7 +24,7 @@ public class CreateSessionRequestValidator : AbstractValidator<CreateSessionRequ
             .NotEmpty();
 
 
-        RuleFor(x => x.Statut)
+        RuleFor(x => x.IsValidated)
            .NotEmpty();
 
 

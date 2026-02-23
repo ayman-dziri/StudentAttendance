@@ -61,7 +61,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             EndTime = DateTime.UtcNow.AddDays(1).AddHours(2),
             TeacherId = ObjectId.GenerateNewId().ToString(),
             Group = "G1",
-            Statut = false
+            IsValidated = false
         },
 
         new Session
@@ -71,7 +71,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             EndTime = DateTime.UtcNow.AddDays(2).AddHours(3),
             TeacherId = ObjectId.GenerateNewId().ToString(),
             Group = "G2",
-            Statut = false
+            IsValidated = false
         },
 
         new Session
@@ -81,7 +81,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
             TeacherId = ObjectId.GenerateNewId().ToString(),
             Group = "G1",
-            Statut = false
+            IsValidated = false
         }
         ,
          new Session
@@ -91,7 +91,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
             TeacherId = ObjectId.GenerateNewId().ToString(),
             Group = "G1",
-            Statut = false
+            IsValidated = false
         } ,
 
           new Session
@@ -101,7 +101,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
             EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
             TeacherId = ObjectId.GenerateNewId().ToString(),
             Group = "G2",
-            Statut = false
+            IsValidated = false
         }
     };
     }

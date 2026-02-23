@@ -1,9 +1,10 @@
 ﻿using StudentAttendance.src.StudentAttendance.Domain.Entities;
-using StudentAttendance.src.StudentAttendance.Domain.IRepositories;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks
 {
-    public class FakeSessionRepository : ISessionRepository
+    public class FakeSessionRepository : ISessionRepository 
     {
         private readonly List<Session> _sessions = new()
         {
