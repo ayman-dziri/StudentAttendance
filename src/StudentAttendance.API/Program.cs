@@ -1,3 +1,4 @@
+using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 using StudentAttendance.src.StudentAttendance.Application.Services;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Injection des couches
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
