@@ -16,8 +16,10 @@
         public Boolean Statut { get; set; } = false;
 
 
-        public bool IsValidated { get; set; } = false; 
+        public bool IsValidated { get; set; } = false;
 
+        public List<Absence> Absences { get; set; } = new();
 
     }
+
 }

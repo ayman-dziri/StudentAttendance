@@ -46,7 +46,6 @@ builder.Services.AddScoped<ISessionsRepository, SessionsRepository>();
 builder.Services.AddScoped<ISessionsService, SessionsService>();
 builder.Services.AddScoped<IAbsenceService, AbsenceService>();
 builder.Services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
-builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 
 
 
@@ -71,6 +70,13 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SwaggerCors", policy =>
+        policy.WithOrigins("http://localhost:54812", "https://localhost:54811")
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
 var app = builder.Build();
 
 
@@ -93,11 +99,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
+app.UseCors("SwaggerCors");
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

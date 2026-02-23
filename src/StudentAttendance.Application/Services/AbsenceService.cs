@@ -4,6 +4,7 @@ using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Services;
 
@@ -14,11 +15,16 @@ public class AbsenceService : IAbsenceService
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly ILogger<AbsenceService> _logger;
+    private readonly ISessionsRepository _sessions;
 
-    public AbsenceService(IAbsenceRepository absenceRepository, ILogger<AbsenceService> logger)
+    public AbsenceService(
+        IAbsenceRepository absenceRepository,
+        ILogger<AbsenceService> logger,
+        ISessionsRepository sessions)
     {
         _absenceRepository = absenceRepository;
         _logger = logger;
+        _sessions = sessions;
     }
 
     /// <inheritdoc />
@@ -66,4 +72,80 @@ public class AbsenceService : IAbsenceService
     }
 
     //method update absence status to ABSENT (hna tzidha a ibrahim melhaoui)
+
+    public async Task UpdateAbsencesBulkAsync(List<UpdateAbsenceStatusRequest> updates, CancellationToken cancellationToken = default)
+    {
+        if (updates.Count == 0) return;
+
+        foreach (var u in updates)
+        {
+            var absence = await _absenceRepository.GetByIdAsync(u.AbsenceId, cancellationToken)
+                ?? throw new AbsenceNotFoundException(u.AbsenceId);
+
+            if (absence.Status == StatusPresence.JUSTIFIED)
+                throw new InvalidOperationException("Absence already JUSTIFIED (admin-only).");
+
+            if (!Enum.TryParse<StatusPresence>(u.Status, ignoreCase: true, out var newStatus))
+                throw new InvalidOperationException("Invalid status. Allowed: PRESENT, ABSENT, LATE");
+
+            if (newStatus == StatusPresence.JUSTIFIED)
+                throw new InvalidOperationException("Do not set JUSTIFIED here.");
+
+            absence.Status = newStatus;
+            await _absenceRepository.UpdateAsync(absence, cancellationToken);
+        }
+    }
+
+    private static string MapStatus(StatusPresence status) => status switch
+    {
+        StatusPresence.PRESENT => "PRESENT",
+        StatusPresence.ABSENT => "ABSENT",
+        StatusPresence.LATE => "LATE",
+        StatusPresence.JUSTIFIED => throw new InvalidOperationException("JUSTIFIED is admin-only."),
+        _ => throw new ArgumentOutOfRangeException(nameof(status))
+    };
+
+    public async Task ValidateAndMarkAsync(string teacherId, string sessionId, MarkAbsencesRequest request)
+    {
+        var session = await _sessions.GetSessionsByIdAsync(sessionId)
+            ?? throw new Exception("Session not found");
+
+        if (session.TeacherId != teacherId)
+            throw new Exception("Unauthorized");
+
+        if (session.IsValidated)
+            throw new Exception("Session already validated");
+
+        // Build bulk updates
+        var updates = new List<UpdateAbsenceStatusRequest>();
+
+        foreach (var mark in request.Marks)
+        {
+            var absence = await _absenceRepository.GetByStudentAndSessionAsync(mark.StudentId, sessionId);
+
+            if (absence is null)
+                throw new Exception($"Absence not found for student {mark.StudentId} in session {sessionId}. Make sure absences are created on session creation.");
+
+            updates.Add(new UpdateAbsenceStatusRequest
+            {
+                AbsenceId = absence.Id,
+                Status = MapStatus(mark.Status)
+            });
+        }
+
+        await UpdateAbsencesBulkAsync(updates);
+
+        // Validate session
+        await _sessions.ValidateAsync(sessionId);
+    }
+
+    public async Task<List<AbsenceDto>> GetMyAbsencesAsync(string studentId)
+    {
+        // Ton implémentation existante ici (ou simple):
+        var absences = await _absenceRepository.GetByStudentIdAsync(studentId);
+        return absences
+            .Where(a => a.Status != StatusPresence.PRESENT) // optionnel si tu veux que l'étudiant voit que non-présents
+            .Select(a => new AbsenceDto(a.Id, a.SessionId, a.Status, a.JustificationDate))
+            .ToList();
+    }
 }

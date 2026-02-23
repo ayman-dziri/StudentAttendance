@@ -2,6 +2,13 @@
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Domain.Enums;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+
+
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 
 public interface ISessionsService
@@ -19,9 +26,6 @@ public interface ISessionsService
 
     Task<List<User>> GetStudentsBySessionIdAsync(string sessionId);
     Task<User?> GetProfessurBySessionIdAsync(string sessionId);
-
-
-
 
 
 }

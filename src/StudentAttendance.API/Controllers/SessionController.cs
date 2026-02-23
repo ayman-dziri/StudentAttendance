@@ -40,7 +40,7 @@ public class SessionController : ControllerBase
         }
     }
 
-    [HttpGet("/sessions/{id}")]
+    [HttpGet("{id}")]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -125,34 +125,31 @@ public class SessionController : ControllerBase
     }
 
 
-    [HttpGet("/sessions/{sessionId}/professor")]
+    [HttpGet("{sessionId}/professor")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<User>> GetProfessorBySessionIdAsync(string sessionId)
-{
-    try
     {
-        var professor = await _sessionsService.GetProfessurBySessionIdAsync(sessionId);
-        if (professor == null)
-            return NotFound($"No professor found for session {sessionId}");
+        try
+        {
+            var professor = await _sessionsService.GetProfessurBySessionIdAsync(sessionId);
+            if (professor == null)
+                return NotFound($"No professor found for session {sessionId}");
 
-        return Ok(professor);
+            return Ok(professor);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting professor for session {SessionId}", sessionId);
+            return StatusCode(500, "An error occurred while retrieving the professor.");
+        }
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error getting professor for session {SessionId}", sessionId);
-        return StatusCode(500, "An error occurred while retrieving the professor.");
-    }
-}
 
 
 
 
-
-
-
-    [HttpPost("/sessions/create")]
+    [HttpPost("create")]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -164,12 +161,12 @@ public class SessionController : ControllerBase
         try
         {
             var createdSession = await _sessionsService.CreateSessionsAsync(sessionrequest);
-            return CreatedAtAction(nameof(GetSessionByIdAsync), new { id = createdSession.Id }, createdSession);
+            return StatusCode(StatusCodes.Status201Created, createdSession);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating session");
-            return StatusCode(500, "An error occurred while creating the session");
+            return StatusCode(500, ex.ToString());
         }
     }
 

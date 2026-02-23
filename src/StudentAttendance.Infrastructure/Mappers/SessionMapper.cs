@@ -10,12 +10,12 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
 
         {
             //copier simplement les propriétés.
-            Id = u.Id,
+            //Id = u.Id,
             StartTime = u.StartTime,
             EndTime = u.EndTime,
             TeacherId = u.TeacherId,
             Group = u.Group,
-            IsValidated = u.IsValidated
+            IsValidated = u.IsValidated,
         };
 
 
@@ -28,7 +28,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             EndTime = d.EndTime,
             TeacherId = d.TeacherId,
             Group = d.Group,
-            IsValidated = d.IsValidated
+            IsValidated = d.IsValidated,
         };
     }
 }

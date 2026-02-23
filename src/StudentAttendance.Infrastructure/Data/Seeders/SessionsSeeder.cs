@@ -86,7 +86,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
         ,
          new Session
         {
-            Id = "SESSION_ID_1",
+            //Id = "SESSION_ID_1",
             StartTime = DateTime.UtcNow.AddDays(3),
             EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
             TeacherId = ObjectId.GenerateNewId().ToString(),
@@ -96,7 +96,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 
           new Session
         {
-            Id = "SESSION_ID_2",
+            //Id = "SESSION_ID_2",
             StartTime = DateTime.UtcNow.AddDays(3),
             EndTime = DateTime.UtcNow.AddDays(3).AddHours(1),
             TeacherId = ObjectId.GenerateNewId().ToString(),

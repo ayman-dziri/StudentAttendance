@@ -23,8 +23,8 @@ public class CreateSessionRequestValidator : AbstractValidator<CreateSessionRequ
         RuleFor(x => x.Group)
             .NotEmpty();
 
-        RuleFor(x => x.IsValidated)
-           .NotEmpty();
+        /*RuleFor(x => x.IsValidated)
+           .NotEmpty();*/
 
 
     }

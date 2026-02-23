@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-
+using StudentAttendance.src.StudentAttendance.Domain.Entities;
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
 {
     public class SessionDocument
@@ -25,6 +25,8 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         [BsonElement("IsValidated")]
         public bool IsValidated { get; set; } = false;
 
+        [BsonElement("absences")]
+        public List<Absence> Absences { get; set; } = new List<Absence>();
 
     }
 }

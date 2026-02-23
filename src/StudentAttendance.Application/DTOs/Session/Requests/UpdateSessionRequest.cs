@@ -11,5 +11,6 @@
     public string Group { get; set; } = null!;
 
     public bool IsValidated { get; set; } = false;
+
 }
 

@@ -1,5 +1,5 @@
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
-
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 
 /// <summary>
@@ -28,4 +28,10 @@ public interface IAbsenceService
     /// <param name="absenceId">Identifiant de l'absence</param>
     /// <param name="cancellationToken">Token d'annulation</param>
     Task JustifyAbsenceAsync(string absenceId, CancellationToken cancellationToken = default);
+
+    // ✅ SCRUM-18 bulk update signature 
+    Task UpdateAbsencesBulkAsync(List<UpdateAbsenceStatusRequest> updates, CancellationToken cancellationToken = default);
+
+    Task ValidateAndMarkAsync(string teacherId, string sessionId, MarkAbsencesRequest request);
+    Task<List<AbsenceDto>> GetMyAbsencesAsync(string studentId);
 }
