@@ -9,7 +9,14 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
         {
             Id = string.Empty,
             Label = dto.Label,
-            CreatedAt = DateTime.UtcNow 
+            CreatedAt = DateTime.UtcNow
+        };
+
+        public static Group ToEntity(string id, UpdateGroupDto dto) => new()
+        {
+            Id = id,
+            Label = dto.Label,
+            CreatedAt = DateTime.UtcNow
         };
 
         public static GroupResponseDto ToDto(Group group) => new()
