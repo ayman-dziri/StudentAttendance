@@ -23,6 +23,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest userRequest, CancellationToken ct)
         {
             await _userService.CreateUserAsync(userRequest, ct);
+
             return Created();
         }
 
