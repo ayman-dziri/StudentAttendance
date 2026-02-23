@@ -13,9 +13,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.DTOs.user
         [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters.")]
         public string LastName { get; set; } = null!;
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Password is required.")]
         [StringLength(100, MinimumLength = 6)]
