@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Mappers;
-
 namespace StudentAttendance.src.StudentAttendance.API.Controllers;
 
 [Route("api/[controller]")]
@@ -40,4 +39,29 @@ public class AbsenceController : ControllerBase
         await _absenceService.JustifyAbsenceAsync(absenceId, cancellationToken);
         return Ok(new { message = "Absence justifiée avec succès" });
     }
+
+    ///<summary>
+    /// Met à jour le statut d'une absence (PRESENT, ABSENT, JUSTIFIED)
+    /// </summary>
+    [HttpPut("{absenceId}/status")]
+    public async Task<IActionResult> UpdateAbsenceStatus(
+        string absenceId,
+        [FromBody] UpdateAbsenceStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _absenceService.UpdateAbsenceStatusAsync(absenceId, request.Status, cancellationToken);
+        return Ok(new { message = "Statut de l'absence mis à jour avec succès" });
+    }
+
+    /// <summary>
+    /// mettre a jour le status de plusieur absence d' un coup
+    /// </summary>
+    [HttpPut("status/masse")]
+    public async Task<IActionResult> UpdateMultipleAbsencesStatus(
+        [FromBody] List<UpdateAbsenceStatusRequest> request,
+        CancellationToken cancellationToken)
+    {
+        await _absenceService.UpdateAbsencesBulkAsync(request, cancellationToken);
+        return Ok(new { message = "Statut des absences mis à jour avec succès" });
+}
 }

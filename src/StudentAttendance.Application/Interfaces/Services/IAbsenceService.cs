@@ -1,4 +1,5 @@
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 
@@ -28,4 +29,14 @@ public interface IAbsenceService
     /// <param name="absenceId">Identifiant de l'absence</param>
     /// <param name="cancellationToken">Token d'annulation</param>
     Task JustifyAbsenceAsync(string absenceId, CancellationToken cancellationToken = default);
+
+    ///<summary>
+    /// Met à jour le statut d'une absence (PRESENT, ABSENT, JUSTIFIED)
+    ///</summary>
+    Task UpdateAbsenceStatusAsync(string absenceId, string status, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// mettre a jour le status de plusieur absence d' un coup
+    /// </summary>
+    Task UpdateAbsencesBulkAsync(List<UpdateAbsenceStatusRequest> updates, CancellationToken cancellationToken = default);
 }
