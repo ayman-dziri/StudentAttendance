@@ -30,8 +30,13 @@ public interface IAbsenceRepository
     /// Met à jour une absence existante
     /// </summary>
     Task UpdateAsync(Absence absence, CancellationToken cancellationToken = default);
+
     Task<Absence?> GetByStudentAndSessionAsync(string studentId, string sessionId);
     Task<List<Absence>> GetByStudentIdAsync(string studentId);
     
     
+
+
+   
+
 }

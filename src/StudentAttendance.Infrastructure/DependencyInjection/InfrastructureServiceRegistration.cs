@@ -29,7 +29,10 @@ public static class InfrastructureServiceRegistration
         // Les repositories seront enregistrés ici au fur et à mesure
         services.AddScoped<IAbsenceRepository, AbsenceRepository>();
         services.AddScoped<ISessionsRepository, SessionsRepository>();
-        
+        services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+
+
 
 
 

@@ -9,16 +9,21 @@ public interface ISessionsRepository
     Task<List<Session>> GetSessionsByTeacherIdAsync(string teacherId);
 
     Task<List<User>> GetStudentsBySessionIdAsync(string sessionId);
-    Task<User?> GetProfessurBySessionIdAsync(string sessionId);
+    Task<string?> GetProfessurBySessionIdAsync(string sessionId);
     Task<List<Session>> GetSessionsByGroupName(string group);
     Task<Session> CreateSessionsAsync(Session session);
     Task<bool> UpdateSessionsAsync(string id, Session session);
     Task<bool> DeleteSessionsAsync(string id);
     Task<bool> ExistsSessionAsync(string id);
 
+
     Task ValidateAsync(string sessionID, CancellationToken cancellationToken = default);
 
     Task<Session?> GetByIdAsync(string sessionId, CancellationToken cancellationToken = default);
+
+    
+
+
 
 }
 

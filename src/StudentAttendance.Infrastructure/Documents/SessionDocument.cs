@@ -25,6 +25,11 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         [BsonElement("IsValidated")]
         public bool IsValidated { get; set; } = false;
 
+        [BsonElement("absences")]
+        public List<AbsenceDocument> Absences { get; set; } = new();
+
+      
+
 
     }
 }

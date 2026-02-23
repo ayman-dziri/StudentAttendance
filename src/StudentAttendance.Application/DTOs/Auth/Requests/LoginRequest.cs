@@ -1,6 +1,5 @@
 ﻿namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Auth.Requests
 {
-    public class LoginRequest
-    {
-    }
+    public record LoginRequest(string Email , string Password);
+    
 }

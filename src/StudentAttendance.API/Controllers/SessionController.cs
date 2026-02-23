@@ -14,18 +14,16 @@ public class SessionController : ControllerBase
     private readonly ISessionsService _sessionsService;
     private readonly ILogger<SessionController> _logger;
 
-
     public SessionController(ISessionsService sessionsService, ILogger<SessionController> logger)
     {
         _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    [HttpGet("/sessions")]
+    // GET api/Session
+    [HttpGet]
     [ProducesResponseType(typeof(List<SessionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
-
     public async Task<ActionResult<List<SessionResponse>>> GetAllSessionsAsync()
     {
         try
@@ -40,73 +38,69 @@ public class SessionController : ControllerBase
         }
     }
 
-    [HttpGet("/sessions/{id}")]
+    // GET api/Session/{id}
+    [HttpGet("{id}", Name = "GetSessionById")]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
     public async Task<ActionResult<SessionResponse>> GetSessionByIdAsync(string id)
     {
         try
         {
             var session = await _sessionsService.GetSessionsByIdAsync(id);
             if (session == null)
-            {
                 return NotFound($"Session with ID {id} not found.");
-            }
+
             return Ok(session);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"An error occurred while retrieving session with ID {id}.");
+            _logger.LogError(ex, "An error occurred while retrieving session with ID {SessionId}.", id);
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
         }
     }
 
-
-    [HttpGet("/session/teacher/{teacherId}")]
+    // GET api/Session/teacher/{teacherId}
+    [HttpGet("teacher/{teacherId}")]
     [ProducesResponseType(typeof(List<SessionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
     public async Task<ActionResult<List<SessionResponse>>> GetSessionByTeacherIdAsync(string teacherId)
     {
         try
         {
-            var session = await _sessionsService.GetSessionsByTeacherIdAsync(teacherId);
-            return Ok(session);
+            var sessions = await _sessionsService.GetSessionsByTeacherIdAsync(teacherId);
+            return Ok(sessions);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"An error occurred while retrieving session for teacher ID {teacherId}");
+            _logger.LogError(ex, "An error occurred while retrieving session for teacher ID {TeacherId}", teacherId);
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
         }
     }
 
-
-    [HttpGet("/session/group/{group}")]
+    // GET api/Session/group/{group}
+    [HttpGet("group/{group}")]
     [ProducesResponseType(typeof(List<SessionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
     public async Task<ActionResult<List<SessionResponse>>> GetSessionsByGroupName(string group)
     {
         try
         {
-            var session = await _sessionsService.GetSessionsByGroupName(group);
-            return Ok(session);
+            var sessions = await _sessionsService.GetSessionsByGroupName(group);
+            return Ok(sessions);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"An error occurred while retrieving session for group name {group}.");
+            _logger.LogError(ex, "An error occurred while retrieving session for group name {Group}.", group);
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
         }
     }
 
-
-    [HttpGet("/sessions/{sessionId}/students")]
+    // GET api/Session/{sessionId}/students
+    [HttpGet("{sessionId}/students")]
     [ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
     public async Task<ActionResult<List<User>>> GetStudentsBySessionIdAsync(string sessionId)
     {
         try
@@ -120,43 +114,37 @@ public class SessionController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting students for session {SessionId}", sessionId);
-            return StatusCode(500, "An error occurred while retrieving students.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving students.");
         }
     }
 
-
-    [HttpGet("/sessions/{sessionId}/professor")]
-    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    // GET api/Session/{sessionId}/professor
+    [HttpGet("{sessionId}/professor")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<User>> GetProfessorBySessionIdAsync(string sessionId)
-{
-    try
+    public async Task<ActionResult<string>> GetProfessorBySessionIdAsync(string sessionId)
     {
-        var professor = await _sessionsService.GetProfessurBySessionIdAsync(sessionId);
-        if (professor == null)
-            return NotFound($"No professor found for session {sessionId}");
+        try
+        {
+            var teacherId = await _sessionsService.GetProfessurBySessionIdAsync(sessionId);
+            if (teacherId == null)
+                return NotFound($"No professor found for session {sessionId}");
 
-        return Ok(professor);
+            return Ok(teacherId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting professor for session {SessionId}", sessionId);
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the professor.");
+        }
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error getting professor for session {SessionId}", sessionId);
-        return StatusCode(500, "An error occurred while retrieving the professor.");
-    }
-}
 
-
-
-
-
-
-
-    [HttpPost("/sessions/create")]
+    // POST api/Session/create
+    [HttpPost("create")]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
     public async Task<ActionResult<SessionResponse>> CreateSessionAsync([FromBody] CreateSessionRequest sessionrequest)
     {
         if (sessionrequest == null) return BadRequest("Session data is required");
@@ -164,18 +152,19 @@ public class SessionController : ControllerBase
         try
         {
             var createdSession = await _sessionsService.CreateSessionsAsync(sessionrequest);
-            return CreatedAtAction(nameof(GetSessionByIdAsync), new { id = createdSession.Id }, createdSession);
+            return CreatedAtRoute("GetSessionById",new { id = createdSession.Id },createdSession);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating session");
-            return StatusCode(500, "An error occurred while creating the session");
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.ToString());
         }
     }
 
-
-    [HttpPut("/sessions/update/{id}")]
+    // PUT api/Session/update/{id}
+    [HttpPut("update/{id}")]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SessionResponse?>> UpdateSessionAsync(string id, [FromBody] UpdateSessionRequest sessionrequest)
@@ -191,35 +180,27 @@ public class SessionController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating session with ID {SessionId}", id);
-            return StatusCode(500, "An error occurred while updating the session");
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.ToString());
         }
     }
 
-
-    [HttpDelete("/sessions/delete/{id}")]
+    // DELETE api/Session/delete/{id}
+    [HttpDelete("delete/{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
-
     public async Task<ActionResult> DeleteSessionsAsync(string id)
     {
         try
         {
             var deleted = await _sessionsService.DeleteSessionsAsync(id);
-            if (deleted)
-            {
-                return NoContent();
-            }
-            else
-            {
-                return NotFound($"The session with Id {id} was not found");
-            }
+            if (deleted) return NoContent();
+            return NotFound($"The session with Id {id} was not found");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting session with ID: {SessionId}", id);
-            return StatusCode(500, "An error occurred while deleting the session");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the session");
         }
     }
 }

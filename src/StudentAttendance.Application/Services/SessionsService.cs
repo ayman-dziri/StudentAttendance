@@ -1,57 +1,52 @@
 ﻿using FluentValidation;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Mappers;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
-
 
 namespace StudentAttendance.src.StudentAttendance.Application.Services;
 
 public class SessionsService : ISessionsService
 {
-    //Service Absence
-    //------------
-    private readonly IAbsenceService _absenceService;
-    //------------
-
-
     private readonly ISessionsRepository _sessionsRepository;
+    private readonly IGroupRepository _groupRepository;
+    private readonly IUserRepository _userRepository;
+
     private readonly ILogger<SessionsService> _logger;
     private readonly IValidator<CreateSessionRequest> _createValidator;
     private readonly IValidator<UpdateSessionRequest> _updateValidator;
-
-
-    //Injection de Conflit d'horaire
-    //------------------
-    private readonly ISessionConflictValidator _conflictValidator;
-    //------------------
-
+    private readonly ISessionConflictValidator _sessionConflictValidator;
 
     public SessionsService(
-        IAbsenceService absenceService,
         ISessionsRepository sessionsRepository,
+        IGroupRepository groupRepository,
+        IUserRepository userRepository,
         ILogger<SessionsService> logger,
         IValidator<CreateSessionRequest> createValidator,
         IValidator<UpdateSessionRequest> updateValidator,
-        ISessionConflictValidator conflictValidator)
+        ISessionConflictValidator sessionConflictValidator)
     {
-        _absenceService = absenceService;
         _sessionsRepository = sessionsRepository;
+        _groupRepository = groupRepository;
+        _userRepository = userRepository;
+
         _logger = logger;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
-        _conflictValidator = conflictValidator;
+        _sessionConflictValidator = sessionConflictValidator;
     }
-
-
 
     public async Task<List<SessionResponse>> GetAllSessionsAsync()
     {
         try
         {
             _logger.LogInformation("Getting all sessions");
+
             var sessions = await _sessionsRepository.GetAllSessionsAsync();
             return sessions.Select(SessionMapper.ToResponse).ToList();
         }
@@ -66,10 +61,10 @@ public class SessionsService : ISessionsService
     {
         try
         {
-            _logger.LogInformation("Getting session by id: {SessionIdId}", id);
-            var sessionbyid =  await _sessionsRepository.GetSessionsByIdAsync(id);
-            return sessionbyid == null ? null : SessionMapper.ToResponse(sessionbyid);
+            _logger.LogInformation("Getting session by id: {SessionId}", id);
 
+            var session = await _sessionsRepository.GetSessionsByIdAsync(id);
+            return session is null ? null : SessionMapper.ToResponse(session);
         }
         catch (Exception ex)
         {
@@ -83,8 +78,9 @@ public class SessionsService : ISessionsService
         try
         {
             _logger.LogInformation("Getting sessions by teacher id: {TeacherId}", teacherId);
-            var sessionbyteacher =  await _sessionsRepository.GetSessionsByTeacherIdAsync(teacherId);
-            return sessionbyteacher.Select(SessionMapper.ToResponse).ToList();
+
+            var sessions = await _sessionsRepository.GetSessionsByTeacherIdAsync(teacherId);
+            return sessions.Select(SessionMapper.ToResponse).ToList();
         }
         catch (Exception ex)
         {
@@ -98,8 +94,9 @@ public class SessionsService : ISessionsService
         try
         {
             _logger.LogInformation("Getting sessions by group name: {GroupName}", group);
-            var sessionbygroup = await _sessionsRepository.GetSessionsByGroupName(group);
-            return sessionbygroup.Select(SessionMapper.ToResponse).ToList();
+
+            var sessions = await _sessionsRepository.GetSessionsByGroupName(group);
+            return sessions.Select(SessionMapper.ToResponse).ToList();
         }
         catch (Exception ex)
         {
@@ -108,17 +105,14 @@ public class SessionsService : ISessionsService
         }
     }
 
-
     public async Task<List<User>> GetStudentsBySessionIdAsync(string sessionId)
     {
         try
         {
             _logger.LogInformation("Getting students by session id: {SessionId}", sessionId);
-           //var students = 
-                return await _sessionsRepository.GetStudentsBySessionIdAsync(sessionId);
 
-
-            //return students.Select(UserMapper.ToResponse).ToList();
+            
+            return await _sessionsRepository.GetStudentsBySessionIdAsync(sessionId);
         }
         catch (Exception ex)
         {
@@ -127,16 +121,12 @@ public class SessionsService : ISessionsService
         }
     }
 
-    public async Task<User?> GetProfessurBySessionIdAsync(string sessionId)
+    public async Task<string?> GetProfessurBySessionIdAsync(string sessionId)
     {
         try
         {
             _logger.LogInformation("Getting professor for session {SessionId}", sessionId);
-
-            //var teacher =
             return await _sessionsRepository.GetProfessurBySessionIdAsync(sessionId);
-
-            // return teacher == null ? null : UserMapper.ToResponse(teacher);
         }
         catch (Exception ex)
         {
@@ -145,40 +135,44 @@ public class SessionsService : ISessionsService
         }
     }
 
-
-
-    public async Task<SessionResponse> CreateSessionsAsync(CreateSessionRequest sessionrequest, CancellationToken cancellationToken = default)
+    public async Task<SessionResponse> CreateSessionsAsync(
+        CreateSessionRequest sessionrequest,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation("Creating session");
 
-            var validationResult = await _createValidator.ValidateAsync(sessionrequest , cancellationToken);
-
+            var validationResult = await _createValidator.ValidateAsync(sessionrequest, cancellationToken);
             if (!validationResult.IsValid)
-            {
                 throw new ValidationException(validationResult.Errors);
-            }
-            else
-            {
-                var session = SessionMapper.ToEntity(sessionrequest);
 
-                await _conflictValidator.ValidateNoConflictAsync(session, excludeSessionId: null, cancellationToken);
+            var session = SessionMapper.ToEntity(sessionrequest);
 
-                var created =  await _sessionsRepository.CreateSessionsAsync(session);
+            await _sessionConflictValidator.ValidateNoConflictAsync(session, null, cancellationToken);
 
-                // Get students of that session group 
-                var students = await _sessionsRepository.GetStudentsBySessionIdAsync(created.Id);
-                var studentIds = students.Select(student => student.Id).ToList();
+            // Recuperer le Group par label = nom
+            var group = await _groupRepository.GetByNameAsync(session.Group, cancellationToken);
+            if (group is null)
+                throw new Exception($"Group '{session.Group}' not found.");
 
+            // Recuperer les étudiants via GroupId
+            var students = await _userRepository.GetStudentsByGroupIdAsync(group.Id, cancellationToken);
 
+            // Creer les absences 
+            session.Absences = students
+                .Select(s => new Absence
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    StudentId = s.Id,
+                    Status = StatusPresence.PRESENT,
+                    JustificationDate = null
+                })
+                .ToList();
 
-                //implementation de creation de absence PRESENT pour les etudiants
-                await _absenceService.CreateAbsencesForSessionAsync(created.Id, studentIds, cancellationToken);
+            var created = await _sessionsRepository.CreateSessionsAsync(session);
 
-                return SessionMapper.ToResponse(created);
-            }
-
+            return SessionMapper.ToResponse(created);
         }
         catch (Exception ex)
         {
@@ -191,76 +185,79 @@ public class SessionsService : ISessionsService
     {
         try
         {
-            _logger.LogInformation("Updating session with Id : {SessionId}", id);
+            _logger.LogInformation("Updating session with Id: {SessionId}", id);
 
             var existingSession = await _sessionsRepository.GetSessionsByIdAsync(id);
-            if (existingSession == null)
+            if (existingSession is null)
             {
-                _logger.LogWarning("Session with ID : {SessionId} not found", id);
+                _logger.LogWarning("Session with ID: {SessionId} not found", id);
                 return null;
             }
-            else
+
+            var validationResult = await _updateValidator.ValidateAsync(sessionrequest);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            // Garder lancien group pour detecter un changement
+            var oldGroupLabel = existingSession.Group;
+
+            // Appliquer update sur lentite existante
+            SessionMapper.MapUpdate(sessionrequest, existingSession);
+
+            // Vérifier conflit de planning
+            await _sessionConflictValidator.ValidateNoConflictAsync(existingSession, id, CancellationToken.None);
+
+            // Si le groupe a changé, on régénère la liste des absences
+            if (!string.Equals(oldGroupLabel, existingSession.Group, StringComparison.OrdinalIgnoreCase))
             {
-                var validationresult = await _updateValidator.ValidateAsync(sessionrequest);
+                var group = await _groupRepository.GetByNameAsync(existingSession.Group, CancellationToken.None);
+                if (group is null)
+                    throw new Exception($"Group '{existingSession.Group}' not found.");
 
-                if (!validationresult.IsValid)
-                {
-                    throw new ValidationException(validationresult.Errors);
-                }
-                else
-                {
-                    SessionMapper.MapUpdate(sessionrequest , existingSession);
+                var students = await _userRepository.GetStudentsByGroupIdAsync(group.Id, CancellationToken.None);
 
-                    await _conflictValidator.ValidateNoConflictAsync(existingSession, excludeSessionId: id , CancellationToken.None);
-
-                    var updated = await _sessionsRepository.UpdateSessionsAsync(id, existingSession);
-
-                    return updated ? SessionMapper.ToResponse(existingSession) : null;
-                }
+                existingSession.Absences = students
+                    .Select(s => new Absence
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        StudentId = s.Id,
+                        Status = StatusPresence.PRESENT,
+                        JustificationDate = null
+                    })
+                    .ToList();
             }
+
+            var updated = await _sessionsRepository.UpdateSessionsAsync(id, existingSession);
+            if (!updated) return null;
+
+            return SessionMapper.ToResponse(existingSession);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError(e, "Error updating session with ID : {SessionId}", id);
+            _logger.LogError(ex, "Error updating session with ID: {SessionId}", id);
             throw;
         }
     }
-
 
     public async Task<bool> DeleteSessionsAsync(string id)
     {
         try
         {
-            _logger.LogInformation("Deleting session with ID : {SessionId}", id);
+            _logger.LogInformation("Deleting session with ID: {SessionId}", id);
 
-            var existingSession = await _sessionsRepository.ExistsSessionAsync(id);
-
-            if (!existingSession)
+            var exists = await _sessionsRepository.ExistsSessionAsync(id);
+            if (!exists)
             {
-                _logger.LogWarning("Session with ID : {SessionId} not found", id);
+                _logger.LogWarning("Session with ID: {SessionId} not found", id);
                 return false;
             }
-            else
-            {
-                return await _sessionsRepository.DeleteSessionsAsync(id);
-            }
+
+            return await _sessionsRepository.DeleteSessionsAsync(id);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError(e, "Error deleting session with ID : {SessionId}", id);
+            _logger.LogError(ex, "Error deleting session with ID: {SessionId}", id);
             throw;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 }
-

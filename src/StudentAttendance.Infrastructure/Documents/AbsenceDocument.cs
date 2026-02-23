@@ -8,7 +8,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = null!;
+        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
         [BsonElement("status")]
         public StatusPresence Status { get; set; }

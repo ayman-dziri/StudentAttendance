@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
 using StudentAttendance.src.StudentAttendance.Application.Exceptions;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+using StudentAttendance.src.StudentAttendance.Application.Mappers;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
@@ -64,4 +66,12 @@ public class AbsenceService : IAbsenceService
 
         _logger.LogInformation("Absence {AbsenceId} justifiée avec succès", absenceId);
     }
+
+    public async Task<List<AbsenceResponse>> GetAbsencesBySessionIdAsync(string sessionId , CancellationToken cancellationToken = default)
+    {
+        var absences = await _absenceRepository.GetBySessionIdAsync(sessionId, cancellationToken);
+        return absences.Select(AbsenceMapper.ToResponse).ToList();
+    }
+
+    //method update absence status to ABSENT (hna tzidha a ibrahim melhaoui)
 }

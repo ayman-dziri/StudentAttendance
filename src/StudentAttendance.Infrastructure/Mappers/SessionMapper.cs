@@ -5,30 +5,46 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
 {
     public class SessionMapper
     {
-
-        public static SessionDocument ToDocument(Session u) => new() // Transformer une entité Domain (Session) en objet Mongo (SessionDocument)
-
+        // Domain → Mongo
+        public static SessionDocument ToDocument(Session u) => new()
         {
-            //copier simplement les propriétés.
-            Id = u.Id,  
+            Id = u.Id,
             StartTime = u.StartTime,
             EndTime = u.EndTime,
             TeacherId = u.TeacherId,
             Group = u.Group,
-            IsValidated = u.IsValidated
+            IsValidated = u.IsValidated,
+
+            Absences = u.Absences?
+                .Select(a => new AbsenceDocument
+                {
+                    Id = a.Id,
+                    StudentId = a.StudentId,
+                    Status = a.Status,
+                    JustificationDate = a.JustificationDate
+                })
+                .ToList() ?? new List<AbsenceDocument>()
         };
 
-
-        //l'inverse
-        public static Session ToDomain(SessionDocument d) => new() //Quand tu fais un Find dans Mongo, tu récupères un SessionDocument
-
+        // Mongo → Domain
+        public static Session ToDomain(SessionDocument d) => new()
         {
             Id = d.Id,
             StartTime = d.StartTime,
             EndTime = d.EndTime,
             TeacherId = d.TeacherId,
             Group = d.Group,
-            IsValidated = d.IsValidated
+            IsValidated = d.IsValidated,
+
+            Absences = d.Absences?
+                .Select(a => new Absence
+                {
+                    Id = a.Id,
+                    StudentId = a.StudentId,
+                    Status = a.Status,
+                    JustificationDate = a.JustificationDate
+                })
+                .ToList() ?? new List<Absence>()
         };
     }
 }

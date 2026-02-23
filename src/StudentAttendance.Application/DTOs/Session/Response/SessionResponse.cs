@@ -1,4 +1,6 @@
-﻿namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
+﻿using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
+
+namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
 
     public class SessionResponse
     {
@@ -13,4 +15,6 @@
     public string Group { get; set; } = null!;
 
     public bool IsValidated { get; set; } = false;
+
+    public List<AbsenceResponse> Absences { get; set; } = new();
 }

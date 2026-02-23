@@ -17,7 +17,7 @@ public interface ISessionsService
     Task<bool> DeleteSessionsAsync(string id);
 
     Task<List<User>> GetStudentsBySessionIdAsync(string sessionId);
-    Task<User?> GetProfessurBySessionIdAsync(string sessionId);
+    Task<string?> GetProfessurBySessionIdAsync(string sessionId);
 
 
 

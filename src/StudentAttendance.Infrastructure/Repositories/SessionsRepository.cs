@@ -21,156 +21,141 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             var collectionSessions = options.Value.Collections?["Sessions"] ?? "Sessions";
             var collectionsGroups = options.Value.Collections?["Groups"] ?? "Groups";
             var collectionUsers = options.Value.Collections?["Users"] ?? "Users";
-            
+
             _sessionsCollection = mongoClientFactory.GetMongoCollection<SessionDocument>(collectionSessions);
             _groupsCollection = mongoClientFactory.GetMongoCollection<GroupDocument>(collectionsGroups);
             _usersCollection = mongoClientFactory.GetMongoCollection<UserDocument>(collectionUsers);
-
         }
-
 
         public async Task<List<Session>> GetAllSessionsAsync()
         {
-            var docs = await _sessionsCollection.Find(_ => true).ToListAsync();
+            var docs = await _sessionsCollection.Find(_ => true).ToListAsync().ConfigureAwait(false);
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
 
-
-        public async Task<Session?> GetSessionsByIdAsync(string id) {
-
-            var doc = await _sessionsCollection.Find(session => session.Id == id).FirstOrDefaultAsync().ConfigureAwait(false);
-            return doc == null ? null : SessionMapper.ToDomain(doc);
-        }
-
-        public async Task<Session?> GetByIdAsync(string sessionId , CancellationToken  cancellationToken = default )
+        // Garde UNE seule méthode "Get by id" (avec token)
+        public async Task<Session?> GetByIdAsync(string sessionId, CancellationToken cancellationToken = default)
         {
-
             var doc = await _sessionsCollection
-            .Find(s => s.Id == sessionId)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
+                .Find(s => s.Id == sessionId)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-            return doc == null ? null : SessionMapper.ToDomain(doc);
+            return doc is null ? null : SessionMapper.ToDomain(doc);
         }
 
+        // Si ton interface exige GetSessionsByIdAsync, fais-la appeler GetByIdAsync
+        public Task<Session?> GetSessionsByIdAsync(string id)
+            => GetByIdAsync(id, CancellationToken.None);
 
         public async Task<List<User>> GetStudentsBySessionIdAsync(string sessionId)
         {
-            var session = await _sessionsCollection.Find(session => session.Id == sessionId).FirstOrDefaultAsync().ConfigureAwait(false);
-            
-            if(session == null)
-            {
+            // 1) Récupérer la session
+            var session = await _sessionsCollection
+                .Find(s => s.Id == sessionId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (session is null)
                 return new List<User>();
-            }
-            
-            // Recuperer le groupe avec le label
-            var group = await _groupsCollection.Find(group => group.Label == session.Group).FirstOrDefaultAsync().ConfigureAwait(false);
 
+            // 2) Récupérer le groupe via label (session.Group)
+            var group = await _groupsCollection
+                .Find(g => g.Label == session.Group)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
 
-            if(group == null)
-            {
+            if (group is null)
                 return new List<User>();
-            }
 
+            // 3) Récupérer les étudiants via GroupId
+            var studentsDocs = await _usersCollection
+                .Find(u => u.GroupId == group.Id && u.Role == Role.STUDENT && u.IsActive)
+                .ToListAsync()
+                .ConfigureAwait(false);
 
-            // Recuperer les étudiants de ce groupe
-            var students = await _usersCollection.Find(user => user.GroupId == group.Id && user.Role == Role.STUDENT).ToListAsync().ConfigureAwait(false);
-
-
-
-            return students.Select(UserMapper.ToDomain).ToList();
+            return studentsDocs.Select(UserMapper.ToDomain).ToList();
         }
 
-
-        public async Task<User?> GetProfessurBySessionIdAsync(string sessionId)
+        public async Task<string?> GetProfessurBySessionIdAsync(string sessionId)
         {
-            //recuperer la session
-            var session = await _sessionsCollection.Find(session => session.Id == sessionId).FirstOrDefaultAsync().ConfigureAwait(false);
+            var session = await _sessionsCollection
+                .Find(s => s.Id == sessionId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
 
-            if (session == null)
-            {
-                throw new Exception($"Session with ID {sessionId} not found.");
-            }
-
-            // recuperer le groupe avec le label
-            var group = await _groupsCollection.Find(group => group.Label == session.Group).FirstOrDefaultAsync().ConfigureAwait(false);
-
-
-            if (group == null)
-            {
-                return null;
-            }
-
-
-            // Recuperer le professeur de ce groupe
-            var professeurdoc = await _usersCollection.Find(user => user.GroupId == group.Id && user.Role == Role.TEACHER).FirstOrDefaultAsync().ConfigureAwait(false);
-
-            if (professeurdoc == null)
-            {
-                return null;
-            }
-
-            return UserMapper.ToDomain(professeurdoc);
+            // Signature string? => retourne null si introuvable
+            return session?.TeacherId;
         }
 
         public async Task<List<Session>> GetSessionsByGroupName(string group)
         {
+            var docs = await _sessionsCollection
+                .Find(s => s.Group == group)
+                .ToListAsync()
+                .ConfigureAwait(false);
 
-            var docs = await _sessionsCollection.Find(session => session.Group == group).ToListAsync().ConfigureAwait(false);
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
 
-        public async Task<List<Session>> GetSessionsByTeacherIdAsync(string teacherId) {
-            var docs = await _sessionsCollection.Find(session => session.TeacherId == teacherId).ToListAsync().ConfigureAwait(false);
+        public async Task<List<Session>> GetSessionsByTeacherIdAsync(string teacherId)
+        {
+            var docs = await _sessionsCollection
+                .Find(s => s.TeacherId == teacherId)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
 
         public async Task<Session> CreateSessionsAsync(Session session)
         {
             var doc = SessionMapper.ToDocument(session);
-            await _sessionsCollection.InsertOneAsync(doc)
+
+            await _sessionsCollection
+                .InsertOneAsync(doc)
                 .ConfigureAwait(false);
+
             return SessionMapper.ToDomain(doc);
         }
 
         public async Task<bool> UpdateSessionsAsync(string id, Session session)
         {
             var doc = SessionMapper.ToDocument(session);
-            var result = await _sessionsCollection.ReplaceOneAsync(s => s.Id == id, doc)
+
+            var result = await _sessionsCollection
+                .ReplaceOneAsync(s => s.Id == id, doc)
                 .ConfigureAwait(false);
+
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
         public async Task<bool> DeleteSessionsAsync(string id)
         {
-            var result = await _sessionsCollection.DeleteOneAsync(s => s.Id == id)
+            var result = await _sessionsCollection
+                .DeleteOneAsync(s => s.Id == id)
                 .ConfigureAwait(false);
+
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
 
-
         public async Task<bool> ExistsSessionAsync(string id)
         {
-            var count = await _sessionsCollection.CountDocumentsAsync(s => s.Id == id)
+            var count = await _sessionsCollection
+                .CountDocumentsAsync(s => s.Id == id)
                 .ConfigureAwait(false);
+
             return count > 0;
         }
-
 
         public async Task ValidateAsync(string sessionId, CancellationToken cancellationToken = default)
         {
             var filter = Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId);
             var update = Builders<SessionDocument>.Update.Set(s => s.IsValidated, true);
 
-            await _sessionsCollection.UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
+            await _sessionsCollection
+                .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
-
-
-
-
-
-
-
     }
 }

@@ -53,17 +53,7 @@ public class AbsenceRepository : IAbsenceRepository
         return documents.Select(AbsenceMapper.ToDomain).ToList();
     }
 
-    public async Task<Absence?> GetByStudentAndSessionAsync(string studentId, string sessionId)
-    {
-        var filter = Builders<AbsenceDocument>.Filter.And(
-            Builders<AbsenceDocument>.Filter.Eq(x => x.StudentId, studentId),
-            Builders<AbsenceDocument>.Filter.Eq(x => x.SessionId, sessionId)
-        );
-
-        var document = await _collection.Find(filter).FirstOrDefaultAsync();
-        return document is null ? null : AbsenceMapper.ToDomain(document);
-    }
-
+  
     public async Task<List<Absence>> GetByStudentIdAsync(string studentId)
     {
         var filter = Builders<AbsenceDocument>.Filter.Eq(x => x.StudentId, studentId);
@@ -99,5 +89,17 @@ public class AbsenceRepository : IAbsenceRepository
     }
 
 
-   
+    public async Task<Absence?> GetByStudentAndSessionAsync(string studentId, string sessionId)
+    {
+        var filter = Builders<AbsenceDocument>.Filter.And(
+            Builders<AbsenceDocument>.Filter.Eq(x => x.StudentId, studentId),
+            Builders<AbsenceDocument>.Filter.Eq(x => x.SessionId, sessionId)
+        );
+
+        var document = await _collection.Find(filter).FirstOrDefaultAsync();
+        return document is null ? null : AbsenceMapper.ToDomain(document);
+    }
+
+    
+
 }

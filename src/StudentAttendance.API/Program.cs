@@ -2,10 +2,10 @@
 
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using StudentAttendance.API.Configuration;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Services;
 using StudentAttendance.src.StudentAttendance.Application.Services;
@@ -16,11 +16,12 @@ using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
-﻿using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories.Mocks;
+using System.Text.Json.Serialization;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +35,20 @@ builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
 
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection("Jwt"));
+
+
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
+
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
+    });
 
 
 builder.Services.AddFluentValidationAutoValidation();
@@ -52,12 +66,16 @@ builder.Services.AddValidatorsFromAssemblyContaining<UpdateSessionRequestValidat
 // Register seeders
 builder.Services.AddScoped<SessionsSeeder>();
 builder.Services.AddScoped<AbsencesSeeder>();
+builder.Services.AddScoped<UsersSeeder>();
+builder.Services.AddScoped<GroupsSeeder>();
 
 
 // Services Application
 builder.Services.AddScoped<IAbsenceService, AbsenceService>();
 builder.Services.AddScoped<ISessionsService, SessionsService>();
+
 builder.Services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
+builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 
 
@@ -70,8 +88,8 @@ builder.Services.AddSwaggerGen();
 
 // Application service (nom complet)
 builder.Services.AddScoped<
-    StudentAttendance.src.StudentAttendance.Application.Interfaces.IAttendanceService,
-    StudentAttendance.src.StudentAttendance.Application.Interfaces.AttendanceService>();
+    IAttendanceService,
+    AttendanceService>();
 
 
 //var useMocks = builder.Configuration.GetValue<bool>("UseMocks");
@@ -108,10 +126,16 @@ using (var scope = app.Services.CreateScope())
 {
     var seedersessions = scope.ServiceProvider.GetRequiredService<SessionsSeeder>();
     var seederabsences = scope.ServiceProvider.GetRequiredService<AbsencesSeeder>();
+    var seederusers = scope.ServiceProvider.GetRequiredService<UsersSeeder>();
+    var seedergroups = scope.ServiceProvider.GetRequiredService<GroupsSeeder>();
+
 
 
     await seedersessions.SeedAsync();
     await seederabsences.SeedAsync();
+    await seederusers.SeedAsync();
+    await seedergroups.SeedAsync();
+
 
 
 

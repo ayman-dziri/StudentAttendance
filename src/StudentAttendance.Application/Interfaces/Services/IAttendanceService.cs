@@ -1,5 +1,11 @@
+
 ﻿using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+
+﻿using StudentAttendance.src.StudentAttendance.Domain.Entities;
+
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
+
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 
 
@@ -25,7 +31,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces.Service
 
         public async Task ValidateAndMarkAsync(string teacherId, string sessionId, MarkAbsencesRequest request)
         {
-            var session = await _sessions.GetByIdAsync(sessionId)
+            var session = await _sessions.GetSessionsByIdAsync(sessionId)
                 ?? throw new Exception("Session not found");
 
             if (session.TeacherId != teacherId)

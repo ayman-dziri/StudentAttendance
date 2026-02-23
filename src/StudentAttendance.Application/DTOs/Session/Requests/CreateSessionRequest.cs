@@ -6,6 +6,13 @@
     public DateTime EndTime { get; set; }
     public string TeacherId { get; set; } = null!;
     public string Group { get; set; } = null!;
-    public bool IsValidated { get; set; } = false;
+
+    
+
+
+
+
+   
+
 }
 

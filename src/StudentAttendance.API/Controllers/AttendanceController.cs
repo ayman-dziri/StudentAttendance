@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Attendance;
+
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
+
+using StudentAttendance.src.StudentAttendance.Application.Interfaces;
+
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
@@ -42,7 +46,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         [HttpGet("sessions/{sessionId}")]
         public async Task<IActionResult> GetSession(string sessionId)
         {
-            var s = await _sessions.GetByIdAsync(sessionId);
+            var s = await _sessions.GetSessionsByIdAsync(sessionId);
             if (s is null) return NotFound();
             return Ok(s);
         }

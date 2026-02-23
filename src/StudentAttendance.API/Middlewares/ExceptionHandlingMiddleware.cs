@@ -41,6 +41,7 @@ public class ExceptionHandlingMiddleware
             InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
 
             ConflictScheduleException => (HttpStatusCode.Conflict, exception.Message),
+
             FormatException => (HttpStatusCode.BadRequest, "L'identifiant fourni n'est pas valide"),
 
             _ => (HttpStatusCode.InternalServerError, "Une erreur interne est survenue")
