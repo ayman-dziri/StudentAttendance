@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Collections;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
@@ -72,11 +73,26 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return result.DeletedCount > 0;
         }
 
-        public async Task<User?> GetUserByEmail(string email, CancellationToken ct = default)
+        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct = default)
         {
             var user = await _collection.Find(x => x.Email == email).FirstOrDefaultAsync(ct);
 
             return UserMapper.ToDomain(user);
+        }
+
+        public async Task<List<User>> GetStudentsByGroupIdAsync(string groupId, CancellationToken ct = default)
+        {
+            var filters = Builders<UserDocument>.Filter.And( // utilisant plusieurs filtres avec And
+                    Builders<UserDocument>.Filter.Eq(x => x.Role, Role.STUDENT), // 1er filtre : juste qui ont le role STUDENT
+                    Builders<UserDocument>.Filter.Eq(x => x.GroupId, groupId) // 2eme filtre : les users qui appartient à ce groupId
+                );
+            var users = await _collection.Find(filters).ToListAsync(ct); // on recuperant ces elements sous une liste
+            Console.WriteLine("nbr users : ",users.Count);
+            Console.WriteLine("etudiants : ", users);
+
+            var results =  users.Select(UserMapper.ToDomain).ToList(); // on retournant la liste des users en les mappant de document vers entités
+            Console.WriteLine("Etudiants by Group : ", results);
+            return results;
         }
     }
 }

@@ -11,5 +11,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
         Task<bool> UpdateUserAsync(string id, UpdateUserRequest updateUser, CancellationToken ct = default);
         Task<bool> DeleteUserAsync(string id, CancellationToken ct = default);
         Task<User?> GetUserByEmail(string email, CancellationToken ct = default);
+        Task<List<User>> GetStudentsByGroupAsync(string groupId, CancellationToken ct = default);
     }
 }
