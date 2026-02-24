@@ -4,6 +4,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Enums;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
 {
+    [BsonIgnoreExtraElements]
     public class AbsenceDocument
     {
         [BsonId]

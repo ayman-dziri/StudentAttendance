@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
@@ -164,8 +165,78 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 a => a.StudentId == studentId
             );
 
-            var docs = await _sessionsCollection.Find(filter).ToListAsync(ct);
+            var docs = await _sessionsCollection.Find(filter).ToListAsync(ct).ConfigureAwait(false);
             return docs.Select(SessionMapper.ToDomain).ToList();
+        }
+
+        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<SessionDocument>.Filter.And(
+                Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
+                Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
+            );
+
+            // ⚠️ Correction: mêmes noms/casse que dans ton document (Absences, Status, JustificationDate)
+            var update = Builders<SessionDocument>.Update
+                .Set("Absences.$.Status", StatusPresence.JUSTIFIED)
+                .Set("Absences.$.JustificationDate", DateTime.UtcNow);
+
+            var result = await _sessionsCollection
+                .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> UpdateAbsenceStatusAsync(
+            string sessionId,
+            string studentId,
+            StatusPresence status,
+            CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<SessionDocument>.Filter.And(
+                Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
+                Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
+            );
+
+            var update = Builders<SessionDocument>.Update
+                .Set("Absences.$.Status", status)
+                .Set("Absences.$.JustificationDate", (DateTime?)null);
+
+            var result = await _sessionsCollection
+                .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> UpdateAbsencesBulkAsync(
+            string sessionId,
+            List<UpdateAbsencesBulkItem> items,
+            CancellationToken cancellationToken = default)
+        {
+            var updates = new List<WriteModel<SessionDocument>>();
+
+            foreach (var item in items)
+            {
+                var filter = Builders<SessionDocument>.Filter.And(
+                    Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
+                    Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == item.StudentId)
+                );
+
+                // ⚠️ Correction: Status est un enum => on stocke la valeur enum directement, pas Int32 forcé
+                var update = Builders<SessionDocument>.Update
+                    .Set("Absences.$.Status", item.Status)
+                    .Set("Absences.$.JustificationDate", (DateTime?)null);
+
+                updates.Add(new UpdateOneModel<SessionDocument>(filter, update));
+            }
+
+            var result = await _sessionsCollection
+                .BulkWriteAsync(updates, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
     }
 
