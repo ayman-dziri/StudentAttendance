@@ -4,21 +4,15 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using StudentAttendance.API.Configuration;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
-using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Services;
-using StudentAttendance.src.StudentAttendance.Application.Services;
-using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
-using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
-using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 using System.Text.Json.Serialization;
 
@@ -85,11 +79,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
-
-// Application service (nom complet)
-builder.Services.AddScoped<
-    IAttendanceService,
-    AttendanceService>();
 
 
 //var useMocks = builder.Configuration.GetValue<bool>("UseMocks");

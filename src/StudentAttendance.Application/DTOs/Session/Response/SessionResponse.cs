@@ -1,4 +1,4 @@
-﻿using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
+﻿using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 
 namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
 

@@ -21,8 +21,7 @@ public interface ISessionsRepository
 
     Task<Session?> GetByIdAsync(string sessionId, CancellationToken cancellationToken = default);
 
-    
-
+    Task<List<Session>> GetSessionsWithStudentAbsenceAsync(string studentId, CancellationToken ct = default);
 
 
 }

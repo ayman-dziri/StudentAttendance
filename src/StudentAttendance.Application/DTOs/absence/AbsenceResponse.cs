@@ -1,6 +1,6 @@
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 
-namespace StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
+namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 
 /// <summary>
 /// Réponse renvoyée pour une absence 

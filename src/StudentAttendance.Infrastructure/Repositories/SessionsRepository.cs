@@ -122,7 +122,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
         public async Task<bool> UpdateSessionsAsync(string id, Session session)
         {
             var doc = SessionMapper.ToDocument(session);
-
+            
             var result = await _sessionsCollection
                 .ReplaceOneAsync(s => s.Id == id, doc)
                 .ConfigureAwait(false);
@@ -157,5 +157,17 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
+        public async Task<List<Session>> GetSessionsWithStudentAbsenceAsync(string studentId, CancellationToken ct = default)
+        {
+            var filter = Builders<SessionDocument>.Filter.ElemMatch(
+                s => s.Absences,
+                a => a.StudentId == studentId
+            );
+
+            var docs = await _sessionsCollection.Find(filter).ToListAsync(ct);
+            return docs.Select(SessionMapper.ToDomain).ToList();
+        }
     }
+
+
 }

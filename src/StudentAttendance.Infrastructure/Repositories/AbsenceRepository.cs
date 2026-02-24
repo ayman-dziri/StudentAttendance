@@ -75,6 +75,9 @@ public class AbsenceRepository : IAbsenceRepository
     /// <inheritdoc />
     public async Task<Absence?> GetByIdAsync(string absenceId, CancellationToken cancellationToken = default)
     {
+        if (!MongoDB.Bson.ObjectId.TryParse(absenceId, out _))
+            return null; // ou throw new Exception("Invalid absenceId format");
+
         var filter = Builders<AbsenceDocument>.Filter.Eq(d => d.Id, absenceId);
         var document = await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
         return document is null ? null : AbsenceMapper.ToDomain(document);

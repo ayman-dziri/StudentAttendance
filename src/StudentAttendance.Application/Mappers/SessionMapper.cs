@@ -1,5 +1,5 @@
 ﻿using MongoDB.Bson;
-using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
