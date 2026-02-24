@@ -38,7 +38,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser([FromRoute] string id , CancellationToken ct)
         {
-            var user = await _userService.GetByIdAsync(id, ct);
+            var user = await _userService.GetByIdAsync(id);
 
             return Ok(user);
         }
@@ -57,6 +57,14 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         {
             await _userService.DeleteUserAsync(id, ct);
             return Ok();
+        }
+
+        [HttpGet("users/{groupId}")]
+        public async Task<IActionResult> GetUsersByGroup([FromRoute] string groupId, CancellationToken ct)
+        {
+            var users = await _userService.GetStudentsByGroupAsync(groupId, ct);
+
+            return Ok(users);
         }
     }
 }
