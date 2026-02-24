@@ -87,8 +87,6 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                     Builders<UserDocument>.Filter.Eq(x => x.GroupId, groupId) // 2eme filtre : les users qui appartient à ce groupId
                 );
             var users = await _collection.Find(filters).ToListAsync(ct); // on recuperant ces elements sous une liste
-            Console.WriteLine("nbr users : ",users.Count);
-            Console.WriteLine("etudiants : ", users);
 
             var results =  users.Select(UserMapper.ToDomain).ToList(); // on retournant la liste des users en les mappant de document vers entités
             Console.WriteLine("Etudiants by Group : ", results);

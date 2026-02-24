@@ -87,7 +87,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             return await user;
         }
 
-        public async Task<List<User>> GetStudentsByGroupAsync(string groupId, CancellationToken ct = default)
+        public async Task<List<User>> GetStudentsByGroupAsync(string groupId, CancellationToken ct = default) // utilisée dans d'autres services
         {
             var students = await _userRepository.GetStudentsByGroupIdAsync(groupId, ct);
             if (students is null) throw new NotFoundException($"students with this groupId '{groupId}' was not found");
