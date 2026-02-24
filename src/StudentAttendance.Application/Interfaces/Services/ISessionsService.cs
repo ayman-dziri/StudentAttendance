@@ -18,6 +18,9 @@ public interface ISessionsService
 
     Task<List<User>> GetStudentsBySessionIdAsync(string sessionId);
     Task<string?> GetProfessurBySessionIdAsync(string sessionId);
+    Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, UpdateAbsenceStatusRequest request, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default);
 
 
 

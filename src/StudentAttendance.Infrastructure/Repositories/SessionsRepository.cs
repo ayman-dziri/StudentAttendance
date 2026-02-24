@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
@@ -157,5 +158,63 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
+        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId,CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<SessionDocument>.Filter.And(
+                Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
+                Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
+            );
+            var update =Builders<SessionDocument>.Update
+                .Set("absences.$.status", StatusPresence.JUSTIFIED)
+                .Set("Absences.$.JustificationDate", DateTime.UtcNow);
+                
+            var result = await _sessionsCollection
+                .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, StatusPresence status, CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<SessionDocument>.Filter.And(
+                Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
+                Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
+            );
+            var update = Builders<SessionDocument>.Update
+                .Set("Absences.$.Status", status)
+                .Set("Absences.$.JustificationDate", (DateTime?)null);
+
+
+            var result = await _sessionsCollection
+                .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
+        }
+        public async Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default)
+{
+    var updates = new List<WriteModel<SessionDocument>>();
+
+    foreach (var item in items)
+    {
+        var filter = Builders<SessionDocument>.Filter.And(
+            Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
+            Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == item.StudentId)
+        );
+
+        var update = Builders<SessionDocument>.Update
+            .Set("absences.$.status", (Int32)item.Status)
+            .Set("absences.$.justificationDate", (DateTime?)null);
+
+        updates.Add(new UpdateOneModel<SessionDocument>(filter, update));
+    }
+
+    var result = await _sessionsCollection
+        .BulkWriteAsync(updates, cancellationToken: cancellationToken)
+        .ConfigureAwait(false);
+
+    return result.IsAcknowledged && result.ModifiedCount > 0;
+}
     }
 }

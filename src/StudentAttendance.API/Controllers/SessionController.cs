@@ -203,4 +203,93 @@ public class SessionController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the session");
         }
     }
+   // PUT api/Session/{sessionId}/justify/{studentId}
+[HttpPut("{sessionId}/justify/{studentId}")]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+public async Task<ActionResult> JustifyAbsenceAsync(string sessionId, string studentId)
+{
+    try
+    {
+        var result = await _sessionsService.JustifyAbsenceAsync(sessionId, studentId);
+        if (!result) return NotFound($"Aucune absence trouvée pour l'étudiant '{studentId}' dans la séance '{sessionId}'.");
+        return Ok("Absence justifiée avec succès.");
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erreur lors de la justification de l'absence de l'étudiant {StudentId} dans la séance {SessionId}", studentId, sessionId);
+        return StatusCode(StatusCodes.Status500InternalServerError, "Une erreur est survenue lors du traitement de votre demande.");
+    }
+}
+// PATCH api/Session/{sessionId}/absence/{studentId}
+[HttpPatch("{sessionId}/absence/{studentId}")]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+public async Task<ActionResult> UpdateAbsenceStatusAsync(string sessionId, string studentId, [FromBody] UpdateAbsenceStatusRequest request)
+{
+    if (request == null) return BadRequest("Les données de la requête sont requises.");
+
+    try
+    {
+        var result = await _sessionsService.UpdateAbsenceStatusAsync(sessionId, studentId, request);
+        if (!result) return NotFound($"Aucune absence trouvée pour l'étudiant '{studentId}' dans la séance '{sessionId}'.");
+        return Ok("Statut de l'absence mis à jour avec succès.");
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erreur lors de la mise à jour du statut d'absence de l'étudiant {StudentId} dans la séance {SessionId}", studentId, sessionId);
+        return StatusCode(StatusCodes.Status500InternalServerError, "Une erreur est survenue lors du traitement de votre demande.");
+    }
+    
+}
+// PATCH api/Session/{sessionId}/absences
+[HttpPatch("{sessionId}/absences")]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+public async Task<ActionResult> UpdateAbsencesBulkAsync(string sessionId, [FromBody] List<UpdateAbsencesBulkItem> items)
+{
+    if (items == null || !items.Any()) return BadRequest("La liste des absences est requise.");
+
+    try
+    {
+        var result = await _sessionsService.UpdateAbsencesBulkAsync(sessionId, items);
+        if (!result) return NotFound($"Aucune absence mise à jour pour la séance '{sessionId}'.");
+        return Ok("Absences mises à jour avec succès.");
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erreur lors de la mise à jour en masse des absences pour la séance {SessionId}", sessionId);
+        return StatusCode(StatusCodes.Status500InternalServerError, "Une erreur est survenue lors du traitement de votre demande.");
+    }
+}
 }

@@ -260,4 +260,136 @@ public class SessionsService : ISessionsService
             throw;
         }
     }
+        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default)
+{
+    try
+    {
+        _logger.LogInformation("Justifying absence for student {StudentId} in session {SessionId}", studentId, sessionId);
+
+        // Vérifier que la session existe
+        var session = await _sessionsRepository.GetSessionsByIdAsync(sessionId);
+        if (session is null)
+            throw new KeyNotFoundException($"Session with ID '{sessionId}' not found.");
+
+        // Vérifier que l'étudiant a bien une absence dans cette session
+        var absence = session.Absences.FirstOrDefault(a => a.StudentId == studentId);
+        if (absence is null)
+            throw new KeyNotFoundException($"No absence found for student '{studentId}' in session '{sessionId}'.");
+
+        // Vérifier que l'absence n'est pas déjà justifiée
+        if (absence.Status == StatusPresence.JUSTIFIED)
+            throw new InvalidOperationException($"Absence for student '{studentId}' is already justified.");
+
+        return await _sessionsRepository.JustifyAbsenceAsync(sessionId, studentId, cancellationToken);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error justifying absence for student {StudentId} in session {SessionId}", studentId, sessionId);
+        throw;
+    }
+    }
+    public async Task<bool> JustifierAbsenceAsync(
+    string sessionId,
+    string studentId,
+    CancellationToken cancellationToken = default)
+{
+    try
+    {
+        _logger.LogInformation("Justification de l'absence de l'étudiant {StudentId} pour la séance {SessionId}",studentId,sessionId);
+
+        // Vérifier que la séance existe
+        var session = await _sessionsRepository.GetSessionsByIdAsync(sessionId);
+
+        if (session is null)
+            throw new KeyNotFoundException($"Séance avec l'identifiant '{sessionId}' introuvable.");
+
+        // Vérifier que l'étudiant a une absence dans cette séance
+        var absence = session.Absences .FirstOrDefault(a => a.StudentId == studentId);
+
+        if (absence is null)
+            throw new KeyNotFoundException( $"Aucune absence trouvée pour l'étudiant '{studentId}' dans la séance '{sessionId}'.");
+
+        // Vérifier que l'absence n'est pas déjà justifiée
+       if (absence.Status != StatusPresence.ABSENT && absence.Status != StatusPresence.LATE)
+    throw new InvalidOperationException($"Impossible de justifier : l'étudiant '{studentId}' n'est pas ABSENT (statut actuel : '{absence.Status}').");
+
+        // Appel au repository pour effectuer la mise à jour
+        return await _sessionsRepository.JustifyAbsenceAsync(sessionId, studentId, cancellationToken);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError( ex,"Erreur lors de la justification de l'absence de l'étudiant {StudentId} pour la séance {SessionId}", studentId, sessionId);
+
+        throw;
+    }
 }
+
+  public async Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, UpdateAbsenceStatusRequest request, CancellationToken cancellationToken = default)
+{
+    try
+    {
+        _logger.LogInformation("Mise à jour du statut d'absence pour l'étudiant {StudentId} dans la séance {SessionId}", studentId, sessionId);
+
+        // Vérifier que le statut est autorisé (seulement ABSENT ou LATE)
+        if (request.Status != StatusPresence.ABSENT && request.Status != StatusPresence.LATE)
+            throw new InvalidOperationException($"Le statut '{request.Status}' n'est pas autorisé. Seuls ABSENT et LATE sont acceptés.");
+
+        // Vérifier que la session existe
+        var session = await _sessionsRepository.GetSessionsByIdAsync(sessionId);
+        if (session is null)
+            throw new KeyNotFoundException($"La séance '{sessionId}' est introuvable.");
+
+        // Vérifier que l'étudiant a une absence dans cette session
+        var absence = session.Absences.FirstOrDefault(a => a.StudentId == studentId);
+        if (absence is null)
+            throw new KeyNotFoundException($"Aucune absence trouvée pour l'étudiant '{studentId}' dans la séance '{sessionId}'.");
+
+        // Vérifier que le statut est différent de l'actuel
+        if (absence.Status == request.Status)
+            throw new InvalidOperationException($"L'absence est déjà au statut '{request.Status}'.");
+
+        return await _sessionsRepository.UpdateAbsenceStatusAsync(sessionId, studentId, request.Status, cancellationToken);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erreur lors de la mise à jour du statut d'absence pour l'étudiant {StudentId} dans la séance {SessionId}", studentId, sessionId);
+        throw;
+    }
+    }
+    public async Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default)
+{
+    try
+    {
+        _logger.LogInformation("Mise à jour en masse des absences pour la séance {SessionId}", sessionId);
+
+        if (items == null || !items.Any())
+            throw new ArgumentException("La liste des absences est vide.");
+
+        // Vérifier que la session existe
+        var session = await _sessionsRepository.GetSessionsByIdAsync(sessionId);
+        if (session is null)
+            throw new KeyNotFoundException($"La séance '{sessionId}' est introuvable.");
+
+        // Vérifier chaque item
+        foreach (var item in items)
+        {
+            // Vérifier que le statut est autorisé
+            if (item.Status != StatusPresence.ABSENT && item.Status != StatusPresence.LATE)
+                throw new InvalidOperationException($"Le statut '{item.Status}' n'est pas autorisé. Seuls ABSENT et LATE sont acceptés.");
+
+            // Vérifier que l'étudiant existe dans la session
+            var absence = session.Absences.FirstOrDefault(a => a.StudentId == item.StudentId);
+            if (absence is null)
+                throw new KeyNotFoundException($"Aucune absence trouvée pour l'étudiant '{item.StudentId}' dans la séance '{sessionId}'.");
+        }
+
+        return await _sessionsRepository.UpdateAbsencesBulkAsync(sessionId, items, cancellationToken);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erreur lors de la mise à jour en masse des absences pour la séance {SessionId}", sessionId);
+        throw;
+    }
+}
+}
+
