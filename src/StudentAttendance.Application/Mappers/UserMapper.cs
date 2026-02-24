@@ -12,7 +12,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers
             Password = c.Password,
             BirthDate = c.BirthDate,
             Role = c.Role,
-            GroupId = c.GroupId,
         };
 
         public static CreateUserRequest ToCreateUserRequest(User u) => new()
