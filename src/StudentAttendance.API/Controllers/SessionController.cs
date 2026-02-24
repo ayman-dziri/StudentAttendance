@@ -157,7 +157,7 @@ public class SessionController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating session");
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the session.");
         }
     }
 
@@ -180,7 +180,7 @@ public class SessionController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating session with ID {SessionId}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the session.");
         }
     }
 
