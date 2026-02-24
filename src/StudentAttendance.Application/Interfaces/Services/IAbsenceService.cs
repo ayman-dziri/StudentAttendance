@@ -28,7 +28,7 @@ public interface IAbsenceService
     /// </summary>
     /// <param name="absenceId">Identifiant de l'absence</param>
     /// <param name="cancellationToken">Token d'annulation</param>
-    Task JustifyAbsenceAsync(string absenceId, CancellationToken cancellationToken = default);
+   //Task JustifyAbsenceAsync(string absenceId, CancellationToken cancellationToken = default);
 
 
     Task<List<AbsenceResponse>> GetAbsencesBySessionIdAsync(string sessionId, CancellationToken cancellationToken = default);
@@ -37,7 +37,6 @@ public interface IAbsenceService
     Task UpdateAbsencesBulkAsync(List<UpdateAbsenceStatusRequest> updates, CancellationToken cancellationToken = default);
 
     Task ValidateAndMarkAsync(string teacherId, string sessionId, MarkAbsencesRequest request);
-    Task<List<AbsenceDto>> GetMyAbsencesAsync(string studentId);
     Task<List<StudentAttendanceDto>> GetMyAttendanceAsync(string studentId, CancellationToken ct = default);
 
 }

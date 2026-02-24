@@ -22,16 +22,14 @@ public interface ISessionsRepository
     Task ValidateAsync(string sessionID, CancellationToken cancellationToken = default);
 
     Task<Session?> GetByIdAsync(string sessionId, CancellationToken cancellationToken = default);
-<<<<<<< HEAD
+    Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, StatusPresence status, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default);
+
 
     Task<List<Session>> GetSessionsWithStudentAbsenceAsync(string studentId, CancellationToken ct = default);
-=======
-Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default);
-Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, StatusPresence status, CancellationToken cancellationToken = default);
-Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default);
-    
 
->>>>>>> e0eaaea92b95df97f09ed921846f142b8637c5e2
+
 
 
 }

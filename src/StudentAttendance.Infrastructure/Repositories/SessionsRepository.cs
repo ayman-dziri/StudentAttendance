@@ -123,7 +123,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
         public async Task<bool> UpdateSessionsAsync(string id, Session session)
         {
             var doc = SessionMapper.ToDocument(session);
-            
+
             var result = await _sessionsCollection
                 .ReplaceOneAsync(s => s.Id == id, doc)
                 .ConfigureAwait(false);
@@ -165,22 +165,19 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 a => a.StudentId == studentId
             );
 
-            var docs = await _sessionsCollection.Find(filter).ToListAsync(ct).ConfigureAwait(false);
+            var docs = await _sessionsCollection.Find(filter).ToListAsync(ct);
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
-
-        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default)
+        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId,CancellationToken cancellationToken = default)
         {
             var filter = Builders<SessionDocument>.Filter.And(
                 Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
                 Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
             );
-
-            // ⚠️ Correction: mêmes noms/casse que dans ton document (Absences, Status, JustificationDate)
-            var update = Builders<SessionDocument>.Update
-                .Set("Absences.$.Status", StatusPresence.JUSTIFIED)
+            var update =Builders<SessionDocument>.Update
+                .Set("absences.$.status", StatusPresence.JUSTIFIED)
                 .Set("Absences.$.JustificationDate", DateTime.UtcNow);
-
+                
             var result = await _sessionsCollection
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -188,32 +185,24 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
-        public async Task<bool> UpdateAbsenceStatusAsync(
-            string sessionId,
-            string studentId,
-            StatusPresence status,
-            CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, StatusPresence status, CancellationToken cancellationToken = default)
         {
             var filter = Builders<SessionDocument>.Filter.And(
                 Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
                 Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
             );
-
             var update = Builders<SessionDocument>.Update
                 .Set("Absences.$.Status", status)
                 .Set("Absences.$.JustificationDate", (DateTime?)null);
 
+
             var result = await _sessionsCollection
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
-
-        public async Task<bool> UpdateAbsencesBulkAsync(
-            string sessionId,
-            List<UpdateAbsencesBulkItem> items,
-            CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default)
         {
             var updates = new List<WriteModel<SessionDocument>>();
 
@@ -224,10 +213,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                     Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == item.StudentId)
                 );
 
-                // ⚠️ Correction: Status est un enum => on stocke la valeur enum directement, pas Int32 forcé
                 var update = Builders<SessionDocument>.Update
-                    .Set("Absences.$.Status", item.Status)
-                    .Set("Absences.$.JustificationDate", (DateTime?)null);
+                    .Set("absences.$.status", (Int32)item.Status)
+                    .Set("absences.$.justificationDate", (DateTime?)null);
 
                 updates.Add(new UpdateOneModel<SessionDocument>(filter, update));
             }

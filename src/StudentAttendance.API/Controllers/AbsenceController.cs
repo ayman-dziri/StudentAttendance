@@ -19,22 +19,11 @@ public class AbsenceController : ControllerBase
         _sessions = sessions;
     }
 
-    /// <summary>
-    /// Récupère la liste des absences d'une séance
-    /// </summary>
-    [HttpGet("session/{sessionId}")]
-    [ProducesResponseType(typeof(List<AbsenceResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAbsencesBySession(string sessionId, CancellationToken cancellationToken)
-    {
-        var absences = await _absenceService.GetAbsencesBySessionAsync(sessionId, cancellationToken);
-        var response = absences.Select(AbsenceMapper.ToResponse).ToList();
-        return Ok(response);
-    }
 
     /// <summary>
     /// Justifie une absence (admin uniquement)
     /// </summary>
-    [HttpPut("{absenceId}/justify")]
+    /*[HttpPut("{absenceId}/justify")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -42,7 +31,7 @@ public class AbsenceController : ControllerBase
     {
         await _absenceService.JustifyAbsenceAsync(absenceId, cancellationToken);
         return Ok(new { message = "Absence justifiée avec succès" });
-    }
+    }*/
 
     // PROF: Valider une séance + marquer absences
     [HttpPost("teachers/{teacherId}/sessions/{sessionId}/validate")]
@@ -56,13 +45,13 @@ public class AbsenceController : ControllerBase
     }
 
     // ETUDIANT: Consulter ses absences
-    [HttpGet("students/{studentId}/absences")]
+    /*[HttpGet("students/{studentId}/absences")]
     public async Task<IActionResult> GetStudentAbsences([FromRoute] string studentId)
     {
         var result = await _absenceService.GetMyAbsencesAsync(studentId);
         return Ok(result);
-    }
-    [HttpGet("students/{studentId}/attendance")]
+    }*/
+    [HttpGet("students/{studentId}/absences")]
     public async Task<IActionResult> GetStudentAttendance([FromRoute] string studentId, CancellationToken ct)
     {
         var result = await _absenceService.GetMyAttendanceAsync(studentId, ct);

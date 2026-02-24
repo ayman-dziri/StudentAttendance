@@ -53,7 +53,7 @@ public class AbsenceService : IAbsenceService
     }
 
     /// <inheritdoc />
-    public async Task JustifyAbsenceAsync(string absenceId, CancellationToken cancellationToken = default)
+   /* public async Task JustifyAbsenceAsync(string absenceId, CancellationToken cancellationToken = default)
     {
         var absence = await _absenceRepository.GetByIdAsync(absenceId, cancellationToken)
             ?? throw new AbsenceNotFoundException(absenceId);
@@ -70,8 +70,8 @@ public class AbsenceService : IAbsenceService
         await _absenceRepository.UpdateAsync(absence, cancellationToken);
 
         _logger.LogInformation("Absence {AbsenceId} justifiée avec succès", absenceId);
-    }
-
+    }*/
+    
     public async Task<List<AbsenceResponse>> GetAbsencesBySessionIdAsync(string sessionId , CancellationToken cancellationToken = default)
     {
         var absences = await _absenceRepository.GetBySessionIdAsync(sessionId, cancellationToken);
