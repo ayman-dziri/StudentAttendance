@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces;
+using StudentAttendance.src.StudentAttendance.Application.Services;
 
 namespace StudentAttendance.src.StudentAttendance.Application.DependencyInjection
 {
@@ -7,6 +9,8 @@ namespace StudentAttendance.src.StudentAttendance.Application.DependencyInjectio
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<Interfaces.IGroupService, Services.GroupService>();
+            services.AddScoped<IUserService, UserService>();
+
             return services;
         }
     }
