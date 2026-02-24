@@ -78,7 +78,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             return deleted;
         }
 
-        public async Task<User?> GetUserByEmail(string email, CancellationToken ct = default)
+        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct = default)
         {
             var user = _userRepository.GetUserByEmailAsync(email, ct); // on recupere l'user par son email
             if (string.IsNullOrWhiteSpace(email)) throw new ValidationException("the field email is required");
