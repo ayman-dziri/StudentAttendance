@@ -1,7 +1,9 @@
+
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using StudentAttendance.API.Configuration;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
+using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Services;
@@ -16,22 +18,17 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
+
+
 
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
-builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("Jwt"));
 
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
 
-builder.Services
-    .AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter());
-    });
+    
 
 builder.Services.AddFluentValidationAutoValidation();
 
@@ -43,12 +40,17 @@ builder.Services.AddScoped<SessionsSeeder>();
 builder.Services.AddScoped<UsersSeeder>();
 builder.Services.AddScoped<GroupsSeeder>();
 
-// Services Application
-builder.Services.AddScoped<ISessionsService, SessionsService>();
-builder.Services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
-builder.Services.AddScoped<ITokenService, JwtTokenService>();
 
 builder.Services.AddControllers();
+
+// Controllers & Swagger
+builder.Services.AddControllers()
+                .AddJsonOptions(o =>
+                {
+                    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
+                
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();

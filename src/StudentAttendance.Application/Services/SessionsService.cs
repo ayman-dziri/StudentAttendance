@@ -9,6 +9,7 @@ using StudentAttendance.src.StudentAttendance.Application.Mappers;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Services;
 
@@ -168,7 +169,7 @@ public class SessionsService : ISessionsService
 
             await _sessionConflictValidator.ValidateNoConflictAsync(session, null, cancellationToken);
 
-            var group = await _groupRepository.GetByNameAsync(session.Group, cancellationToken);
+            var group = await _groupRepository.GetGroupByLabelAsync(session.Group, cancellationToken);
             if (group is null)
                 throw new KeyNotFoundException($"Le groupe '{session.Group}' est introuvable.");
 
@@ -225,7 +226,7 @@ public class SessionsService : ISessionsService
 
             if (!string.Equals(oldGroupLabel, existingSession.Group, StringComparison.OrdinalIgnoreCase))
             {
-                var group = await _groupRepository.GetByNameAsync(existingSession.Group, CancellationToken.None);
+                var group = await _groupRepository.GetGroupByLabelAsync(existingSession.Group, CancellationToken.None);
                 if (group is null)
                     throw new KeyNotFoundException($"Le groupe '{existingSession.Group}' est introuvable.");
 
