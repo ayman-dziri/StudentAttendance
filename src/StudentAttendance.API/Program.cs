@@ -1,7 +1,6 @@
 
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using StudentAttendance.API.Configuration;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;

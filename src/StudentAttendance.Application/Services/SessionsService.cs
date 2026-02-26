@@ -8,6 +8,7 @@ using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
 using StudentAttendance.src.StudentAttendance.Application.Mappers;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 

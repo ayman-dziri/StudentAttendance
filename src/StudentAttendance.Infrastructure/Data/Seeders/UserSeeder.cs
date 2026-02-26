@@ -1,7 +1,9 @@
 ﻿using MongoDB.Bson;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 
@@ -25,7 +27,7 @@ public class UsersSeeder
     {
         try
         {
-            var existingUsers = await _userRepository.GetAllUsersAsync();
+            var existingUsers = await _userRepository.GetUsersAsync();
             if (existingUsers.Any())
             {
                 _logger.LogInformation("Users already exist. Seeding skipped.");
@@ -35,8 +37,8 @@ public class UsersSeeder
             _logger.LogInformation("Seeding users...");
 
             // récupérer groupes existants
-            var groupG1 = await _groupRepository.GetByNameAsync("G1");
-            var groupG2 = await _groupRepository.GetByNameAsync("G2");
+            var groupG1 = await _groupRepository.GetGroupByLabelAsync("G1");
+            var groupG2 = await _groupRepository.GetGroupByLabelAsync("G2");
 
             if (groupG1 == null || groupG2 == null)
             {
@@ -48,7 +50,7 @@ public class UsersSeeder
 
             foreach (var user in users)
             {
-                await _userRepository.CreateUserAsync(user);
+                await _userRepository.AddAsync(user);
                 _logger.LogInformation("Seeded user: {UserEmail}", user.Email);
             }
 

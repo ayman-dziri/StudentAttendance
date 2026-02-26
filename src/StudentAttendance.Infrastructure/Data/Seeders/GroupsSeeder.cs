@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
+using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 
@@ -17,7 +18,7 @@ public class GroupsSeeder
 
     public async Task SeedAsync()
     {
-        var existingG1 = await _groupRepository.GetByNameAsync("G1");
+        var existingG1 = await _groupRepository.GetGroupByLabelAsync("G1");
         if (existingG1 != null)
         {
             _logger.LogInformation("Groups already seeded.");
@@ -42,7 +43,7 @@ public class GroupsSeeder
 
         foreach (var group in groups)
         {
-            await _groupRepository.CreateAsync(group); // assure-toi d'avoir cette méthode
+            await _groupRepository.CreateGroupAsync(group); // assure-toi d'avoir cette méthode
         }
 
         _logger.LogInformation("Groups seeded successfully.");

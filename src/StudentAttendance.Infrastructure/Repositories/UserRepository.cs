@@ -3,7 +3,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Collections;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Collections;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Documents;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Mappers;
 

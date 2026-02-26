@@ -13,7 +13,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
     {
         private readonly IMongoCollection<GroupDocument> _groupsCollection;
 
-        public GroupRepository(StudentAttendanceDbContext context)
+        public GroupRepository(MongoDbContext context)
         {
             _groupsCollection = context.GetCollection<GroupDocument>(CollectionNames.Groups);
         }

@@ -1,12 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-<<<<<<< HEAD
-using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
-=======
+
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Repositories;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Configuration;
->>>>>>> d53dc770c0e56610009ef8356d1edf0fa39a55cb
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 
@@ -31,9 +28,9 @@ public static class InfrastructureServiceRegistration
 
         // Repositories
         services.AddScoped<ISessionsRepository, SessionsRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<Domain.Interfaces.IUserRepository, UserRepository>();
 
-        services.AddSingleton<StudentAttendanceDbContext>();
+        services.AddSingleton<MongoDbContext>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
         // Repositories
