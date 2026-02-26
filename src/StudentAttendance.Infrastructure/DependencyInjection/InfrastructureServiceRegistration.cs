@@ -1,10 +1,9 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
+using StudentAttendance.src.StudentAttendance.Domain.Auth;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Providers;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
@@ -28,14 +27,19 @@ public static class InfrastructureServiceRegistration
 
         // Repositories
         services.AddScoped<ISessionsRepository, SessionsRepository>();
-        services.AddScoped<Domain.Interfaces.IUserRepository, UserRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddSingleton<MongoDbContext>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
         // Repositories
         // Les repositories seront enregistrés ici au fur et à mesure
-        services.AddScoped<Domain.Repositories.IGroupRepository, Repositories.GroupRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
+
+
+        // Auth
+        // Token provider
+        services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
 
 
         return services;
