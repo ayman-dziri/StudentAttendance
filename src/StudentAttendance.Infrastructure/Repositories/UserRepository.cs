@@ -1,9 +1,9 @@
-﻿using MongoDB.Driver;
+using MongoDB.Driver;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 using StudentAttendance.src.StudentAttendance.Domain.Enums;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Collections;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Collections;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Documents;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Mappers;
 
@@ -13,7 +13,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
     {
         public readonly IMongoCollection<UserDocument> _collection;
 
-        public UserRepository(StudentAttendanceDbContext context)
+        public UserRepository(MongoDbContext context)
         {
             _collection = context.GetCollection<UserDocument>(CollectionNames.Users);
         }

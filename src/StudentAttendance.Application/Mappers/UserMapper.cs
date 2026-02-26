@@ -3,7 +3,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Entities;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Mappers
 {
-    public class UserMapper
+    public static class UserMapper
     {
         public static User ToEntity(CreateUserRequest c) => new()
         {

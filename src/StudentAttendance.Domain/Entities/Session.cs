@@ -1,4 +1,6 @@
-﻿namespace StudentAttendance.src.StudentAttendance.Domain.Entities
+﻿
+
+namespace StudentAttendance.src.StudentAttendance.Domain.Entities
 {
     public class Session
     {
@@ -12,5 +14,12 @@
         public string TeacherId { get; set; } = null!;
 
         public string Group { get; set; } = null!;
+        public bool IsValidated { get; set; } = false;
+
+        public List<Absence> Absences { get; set; } = new();
+
+
+
+
     }
 }

@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
+using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Repositories;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Configuration;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
 
@@ -18,18 +19,24 @@ public static class InfrastructureServiceRegistration
     /// </summary>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configuration MongoDB
         var mongoSettings = configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>()
             ?? throw new InvalidOperationException("MongoDbSettings section is missing in appsettings.json");
 
         services.AddSingleton(mongoSettings);
-        services.AddSingleton<StudentAttendanceDbContext>();
-        services.AddScoped<IUserRepository, UserRepository>();
+
+        services.AddSingleton<MongoDbContext>();
+
+        // Repositories
+        services.AddScoped<ISessionsRepository, SessionsRepository>();
+        services.AddScoped<Domain.Interfaces.IUserRepository, UserRepository>();
+
+        services.AddSingleton<MongoDbContext>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
         // Repositories
         // Les repositories seront enregistrés ici au fur et à mesure
         services.AddScoped<Domain.Repositories.IGroupRepository, Repositories.GroupRepository>();
+
 
         return services;
     }
