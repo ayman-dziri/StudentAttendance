@@ -12,7 +12,6 @@ public static class AbsenceMapper
     {
         Id = absence.Id,
         StudentId = absence.StudentId,
-        SessionId = absence.SessionId,
         Status = absence.Status,
         JustificationDate = absence.JustificationDate
     };

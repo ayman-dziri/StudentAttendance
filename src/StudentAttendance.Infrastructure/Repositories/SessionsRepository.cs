@@ -28,13 +28,18 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             _usersCollection = mongoClientFactory.GetMongoCollection<UserDocument>(collectionUsers);
         }
 
+        /// <summary>
+        /// Récupère toutes les séances
+        /// </summary>
         public async Task<List<Session>> GetAllSessionsAsync()
         {
             var docs = await _sessionsCollection.Find(_ => true).ToListAsync().ConfigureAwait(false);
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
 
-        // Garde UNE seule méthode "Get by id" (avec token)
+        /// <summary>
+        /// Récupère une séance par son identifiant avec token d'annulation
+        /// </summary>
         public async Task<Session?> GetByIdAsync(string sessionId, CancellationToken cancellationToken = default)
         {
             var doc = await _sessionsCollection
@@ -45,31 +50,31 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return doc is null ? null : SessionMapper.ToDomain(doc);
         }
 
-        // Si ton interface exige GetSessionsByIdAsync, fais-la appeler GetByIdAsync
+        /// <summary>
+        /// Récupère une séance par son identifiant
+        /// </summary>
         public Task<Session?> GetSessionsByIdAsync(string id)
             => GetByIdAsync(id, CancellationToken.None);
 
+        /// <summary>
+        /// Récupère les étudiants d'une séance via le groupe
+        /// </summary>
         public async Task<List<User>> GetStudentsBySessionIdAsync(string sessionId)
         {
-            // 1) Récupérer la session
             var session = await _sessionsCollection
                 .Find(s => s.Id == sessionId)
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
-            if (session is null)
-                return new List<User>();
+            if (session is null) return new List<User>();
 
-            // 2) Récupérer le groupe via label (session.Group)
             var group = await _groupsCollection
                 .Find(g => g.Label == session.Group)
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
-            if (group is null)
-                return new List<User>();
+            if (group is null) return new List<User>();
 
-            // 3) Récupérer les étudiants via GroupId
             var studentsDocs = await _usersCollection
                 .Find(u => u.GroupId == group.Id && u.Role == Role.STUDENT && u.IsActive)
                 .ToListAsync()
@@ -78,6 +83,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return studentsDocs.Select(UserMapper.ToDomain).ToList();
         }
 
+        /// <summary>
+        /// Récupère le professeur d'une séance
+        /// </summary>
         public async Task<string?> GetProfessurBySessionIdAsync(string sessionId)
         {
             var session = await _sessionsCollection
@@ -85,10 +93,12 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
-            // Signature string? => retourne null si introuvable
             return session?.TeacherId;
         }
 
+        /// <summary>
+        /// Récupère les séances d'un groupe
+        /// </summary>
         public async Task<List<Session>> GetSessionsByGroupName(string group)
         {
             var docs = await _sessionsCollection
@@ -99,6 +109,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
 
+        /// <summary>
+        /// Récupère les séances d'un professeur
+        /// </summary>
         public async Task<List<Session>> GetSessionsByTeacherIdAsync(string teacherId)
         {
             var docs = await _sessionsCollection
@@ -109,6 +122,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
 
+        /// <summary>
+        /// Crée une nouvelle séance
+        /// </summary>
         public async Task<Session> CreateSessionsAsync(Session session)
         {
             var doc = SessionMapper.ToDocument(session);
@@ -120,6 +136,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return SessionMapper.ToDomain(doc);
         }
 
+        /// <summary>
+        /// Met à jour une séance existante
+        /// </summary>
         public async Task<bool> UpdateSessionsAsync(string id, Session session)
         {
             var doc = SessionMapper.ToDocument(session);
@@ -131,6 +150,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
+        /// <summary>
+        /// Supprime une séance
+        /// </summary>
         public async Task<bool> DeleteSessionsAsync(string id)
         {
             var result = await _sessionsCollection
@@ -140,6 +162,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
 
+        /// <summary>
+        /// Vérifie si une séance existe
+        /// </summary>
         public async Task<bool> ExistsSessionAsync(string id)
         {
             var count = await _sessionsCollection
@@ -149,15 +174,22 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return count > 0;
         }
 
-        public async Task ValidateAsync(string sessionId, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Valide une séance en passant IsValidated à true
+        /// </summary>
+        public async Task ValidateAsync(string sessionID, CancellationToken cancellationToken = default)
         {
-            var filter = Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId);
+            var filter = Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionID);
             var update = Builders<SessionDocument>.Update.Set(s => s.IsValidated, true);
 
             await _sessionsCollection
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Récupère les séances contenant une absence pour un étudiant donné
+        /// </summary>
         public async Task<List<Session>> GetSessionsWithStudentAbsenceAsync(string studentId, CancellationToken ct = default)
         {
             var filter = Builders<SessionDocument>.Filter.ElemMatch(
@@ -168,16 +200,21 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             var docs = await _sessionsCollection.Find(filter).ToListAsync(ct);
             return docs.Select(SessionMapper.ToDomain).ToList();
         }
-        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId,CancellationToken cancellationToken = default)
+
+        /// <summary>
+        /// Met à jour le statut d'une absence à JUSTIFIED dans la session embedded
+        /// </summary>
+        public async Task<bool> JustifyAbsenceAsync(string sessionId, string studentId, CancellationToken cancellationToken = default)
         {
             var filter = Builders<SessionDocument>.Filter.And(
                 Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
                 Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
             );
-            var update =Builders<SessionDocument>.Update
-                .Set("absences.$.status", StatusPresence.JUSTIFIED)
-                .Set("Absences.$.JustificationDate", DateTime.UtcNow);
-                
+
+            var update = Builders<SessionDocument>.Update
+                .Set("absences.$.status", (int)StatusPresence.JUSTIFIED)
+                .Set("absences.$.justificationDate", DateTime.UtcNow);
+
             var result = await _sessionsCollection
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -185,16 +222,19 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
 
+        /// <summary>
+        /// Met à jour le statut d'une absence dans la session embedded
+        /// </summary>
         public async Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, StatusPresence status, CancellationToken cancellationToken = default)
         {
             var filter = Builders<SessionDocument>.Filter.And(
                 Builders<SessionDocument>.Filter.Eq(s => s.Id, sessionId),
                 Builders<SessionDocument>.Filter.ElemMatch(s => s.Absences, a => a.StudentId == studentId)
             );
-            var update = Builders<SessionDocument>.Update
-                .Set("Absences.$.Status", status)
-                .Set("Absences.$.JustificationDate", (DateTime?)null);
 
+            var update = Builders<SessionDocument>.Update
+                .Set("absences.$.status", (int)status)
+                .Set("absences.$.justificationDate", (DateTime?)null);
 
             var result = await _sessionsCollection
                 .UpdateOneAsync(filter, update, cancellationToken: cancellationToken)
@@ -202,6 +242,10 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
 
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
+
+        /// <summary>
+        /// Met à jour le statut de plusieurs absences en une seule opération
+        /// </summary>
         public async Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default)
         {
             var updates = new List<WriteModel<SessionDocument>>();
@@ -214,7 +258,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 );
 
                 var update = Builders<SessionDocument>.Update
-                    .Set("absences.$.status", (Int32)item.Status)
+                    .Set("absences.$.status", (int)item.Status)
                     .Set("absences.$.justificationDate", (DateTime?)null);
 
                 updates.Add(new UpdateOneModel<SessionDocument>(filter, update));
@@ -227,6 +271,4 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             return result.IsAcknowledged && result.ModifiedCount > 0;
         }
     }
-
-
 }

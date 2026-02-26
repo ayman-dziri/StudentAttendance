@@ -18,11 +18,8 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         [BsonRepresentation(BsonType.ObjectId)]
         public string StudentId { get; set; } = null!;
 
-        [BsonElement("sessionId")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string SessionId { get; set; } = null!;
 
         [BsonElement("justificationDate")]
-        public DateTime? JustificationDate { get; set; }
+        public DateTime? JustificationDate { get; set; } = null!;
     }
 }

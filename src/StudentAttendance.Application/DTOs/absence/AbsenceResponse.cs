@@ -9,7 +9,6 @@ public class AbsenceResponse
 {
     public string Id { get; set; } = null!;
     public string StudentId { get; set; } = null!;
-    public string SessionId { get; set; } = null!;
     public StatusPresence Status { get; set; }
     public DateTime? JustificationDate { get; set; }
 }

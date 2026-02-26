@@ -26,7 +26,6 @@ public interface ISessionsRepository
     Task<bool> UpdateAbsenceStatusAsync(string sessionId, string studentId, StatusPresence status, CancellationToken cancellationToken = default);
     Task<bool> UpdateAbsencesBulkAsync(string sessionId, List<UpdateAbsencesBulkItem> items, CancellationToken cancellationToken = default);
 
-
     Task<List<Session>> GetSessionsWithStudentAbsenceAsync(string studentId, CancellationToken ct = default);
 
 
