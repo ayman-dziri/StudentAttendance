@@ -4,11 +4,7 @@ using FluentValidation.AspNetCore;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces.Services;
-using StudentAttendance.src.StudentAttendance.Application.Services;
-using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Data.Seeders;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
@@ -34,10 +30,6 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateSessionRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UpdateSessionRequestValidator>();
 
-// Seeders
-builder.Services.AddScoped<SessionsSeeder>();
-builder.Services.AddScoped<UsersSeeder>();
-builder.Services.AddScoped<GroupsSeeder>();
 
 
 builder.Services.AddControllers();
@@ -66,17 +58,6 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Seed database
-using (var scope = app.Services.CreateScope())
-{
-    var seederusers = scope.ServiceProvider.GetRequiredService<UsersSeeder>();
-    var seedergroups = scope.ServiceProvider.GetRequiredService<GroupsSeeder>();
-    var seedersessions = scope.ServiceProvider.GetRequiredService<SessionsSeeder>();
-
-    await seedergroups.SeedAsync();
-    await seederusers.SeedAsync();
-    await seedersessions.SeedAsync();
-}
 
 if (app.Environment.IsDevelopment())
 {
