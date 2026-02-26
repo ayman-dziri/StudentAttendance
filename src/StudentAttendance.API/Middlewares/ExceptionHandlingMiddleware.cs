@@ -43,6 +43,8 @@ public class ExceptionHandlingMiddleware
             ConflictScheduleException => (HttpStatusCode.Conflict, exception.Message),
 
             FormatException => (HttpStatusCode.BadRequest, "L'identifiant fourni n'est pas valide"),
+            UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Accès non autorisé"),
+            KeyNotFoundException => (HttpStatusCode.NotFound, exception.Message),
 
             _ => (HttpStatusCode.InternalServerError, "Une erreur interne est survenue")
         };
