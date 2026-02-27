@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,8 @@ using StudentAttendance.src.StudentAttendance.Application.DTOs.user;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 using StudentAttendance.src.StudentAttendance.Application.Mappers;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendanceV2.src.StudentAttendance.Application.DTOs.Auth.Requests;
+using StudentAttendanceV2.src.StudentAttendance.Application.Interfaces;
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
@@ -13,10 +16,14 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthService _authService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService , ICurrentUserService currentUserService , IAuthService authService )
         {
             _userService = userService;
+            _currentUserService = currentUserService;
+            _authService = authService;
         }
 
         [HttpPost]
@@ -36,7 +43,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser([FromRoute] string id , CancellationToken ct)
+        public async Task<IActionResult> GetUser([FromRoute] string id, CancellationToken ct)
         {
             var user = await _userService.GetByIdAsync(id);
 
@@ -53,7 +60,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser([FromRoute]string id, CancellationToken ct)
+        public async Task<IActionResult> DeleteUser([FromRoute] string id, CancellationToken ct)
         {
             await _userService.DeleteUserAsync(id, ct);
             return Ok();
@@ -65,6 +72,47 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
             var users = await _userService.GetStudentsByGroupAsync(groupId, ct);
 
             return Ok(users);
+        }
+
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = _currentUserService.GetCurrentUserId();
+
+            var user = await _userService.GetByIdAsync(userId);
+
+            
+            
+            if (user is null)
+            {
+                return NotFound();
+            }
+            
+            
+                return Ok(new
+                {
+                    user.Id,
+                    user.Email,
+                    user.FirstName,
+                    user.LastName,
+                    user.Role
+                });
+            
+        }
+
+         
+        [HttpPost("ChangePassword")]
+        
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+        var userId = _currentUserService.GetCurrentUserId();
+        await _authService.ChangePasswordAsync(userId, request);
+        return Ok(new
+        {
+            message = "Password changed successfull"
+        });
         }
     }
 }
