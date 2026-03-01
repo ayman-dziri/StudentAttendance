@@ -2,6 +2,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Auth;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces.Repositories;
 using StudentAttendance.src.StudentAttendance.Domain.Repositories;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Providers;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
@@ -22,25 +23,18 @@ public static class InfrastructureServiceRegistration
             ?? throw new InvalidOperationException("MongoDbSettings section is missing in appsettings.json");
 
         services.AddSingleton(mongoSettings);
-
         services.AddSingleton<MongoDbContext>();
 
         // Repositories
         services.AddScoped<ISessionsRepository, SessionsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-
-        services.AddSingleton<MongoDbContext>();
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
-
-        // Repositories
-        // Les repositories seront enregistrés ici au fur et à mesure
         services.AddScoped<IGroupRepository, GroupRepository>();
-
 
         // Auth
         // Token provider
         services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
-
+        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
 
         return services;
     }

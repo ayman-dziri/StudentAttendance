@@ -76,7 +76,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
         public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct = default)
         {
             var user = await _collection.Find(x => x.Email == email).FirstOrDefaultAsync(ct);
-
+            if (user is null) return null;
             return UserMapper.ToDomain(user);
         }
 
