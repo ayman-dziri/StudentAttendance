@@ -26,8 +26,9 @@ public static class ApiServiceRegistration
     /// </summary>
     private static IServiceCollection AddJwt(this IServiceCollection services, IConfiguration configuration)
     {
-        var jwtKey = configuration["Jwt:Key"]
-            ?? throw new InvalidOperationException("Jwt:Key est manquant dans appsettings.json");
+       var jwtKey = configuration["Jwt:Key"] 
+          ?? configuration["Jwt:SigningKey"]
+          ?? throw new InvalidOperationException("Jwt:Key ou Jwt:SigningKey est manquant dans appsettings.json");
 
         services.AddAuthentication(options =>
         {
