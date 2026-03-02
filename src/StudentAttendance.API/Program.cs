@@ -5,6 +5,7 @@ using StudentAttendance.src.StudentAttendance.API.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Interfaces;
@@ -15,6 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Infrastructure (MongoDB, Repositories)
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
+// Config JWT
+builder.Services.AddJwtOptions(builder.Configuration);
 
 // Application (Services métier)
 builder.Services.AddApplication();
@@ -25,6 +29,7 @@ builder.Services.AddApi(builder.Configuration);
 // MongoDB Settings
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
+
 
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
 
