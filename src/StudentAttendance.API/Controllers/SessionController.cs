@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;

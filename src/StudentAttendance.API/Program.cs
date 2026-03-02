@@ -1,6 +1,7 @@
-
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Scalar.AspNetCore;
+using StudentAttendance.src.StudentAttendance.API.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.API.Middlewares;
 using StudentAttendance.src.StudentAttendance.Application.DependencyInjection;
 using StudentAttendance.src.StudentAttendance.Application.FluentDTOsValidators;
@@ -13,66 +14,57 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Infrastructure (MongoDB, Repositories)
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 // Config JWT
 builder.Services.AddJwtOptions(builder.Configuration);
 
+// Application (Services métier)
+builder.Services.AddApplication();
 
+// API (JWT, Scalar, CORS)
+builder.Services.AddApi(builder.Configuration);
 
+// MongoDB Settings
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
 
-
-
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
 
-    
-
+// Validation
 builder.Services.AddFluentValidationAutoValidation();
-
 builder.Services.AddValidatorsFromAssemblyContaining<CreateSessionRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UpdateSessionRequestValidator>();
 
 
-
-builder.Services.AddControllers();
-
-// Controllers & Swagger
+// Controllers
 builder.Services.AddControllers()
-                .AddJsonOptions(o =>
-                {
-                    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                });
-                
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("SwaggerCors", policy =>
-        policy.WithOrigins("http://localhost:54812")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
-});
 
 var app = builder.Build();
 
+// Middleware global d'erreurs
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+// Authentification et autorisation
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+   app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseCors("SwaggerCors");
-app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
