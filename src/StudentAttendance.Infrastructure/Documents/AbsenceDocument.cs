@@ -4,12 +4,11 @@ using StudentAttendance.src.StudentAttendance.Domain.Enums;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
 {
-    [BsonIgnoreExtraElements]
     public class AbsenceDocument
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        public string Id { get; set; } = null!;
 
         [BsonElement("status")]
         public StatusPresence Status { get; set; }
@@ -18,8 +17,11 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         [BsonRepresentation(BsonType.ObjectId)]
         public string StudentId { get; set; } = null!;
 
+        [BsonElement("sessionId")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string SessionId { get; set; } = null!;
 
         [BsonElement("justificationDate")]
-        public DateTime? JustificationDate { get; set; } = null!;
+        public DateTime? JustificationDate { get; set; }
     }
 }

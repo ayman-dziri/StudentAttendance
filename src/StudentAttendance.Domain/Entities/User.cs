@@ -1,5 +1,4 @@
 ﻿using StudentAttendance.src.StudentAttendance.Domain.Enums;
-using System.CodeDom.Compiler;
 
 namespace StudentAttendance.src.StudentAttendance.Domain.Entities
 {
@@ -21,16 +20,8 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Entities
 
         public Role Role { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
 
         public string? GroupId { get; set; }
-
-
-        public void GenerateEmail() // generer un email automatiquement en concatenant le nom + .prenom + .@Winity-artner.com
-        {
-            var domain = "@Winity-Partner.com";
-            var UpperLastname = LastName.ToUpper();
-            Email = $"{FirstName}.{UpperLastname}.{domain}";
-        }
     }
 }

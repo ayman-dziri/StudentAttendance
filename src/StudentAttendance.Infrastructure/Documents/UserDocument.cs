@@ -28,11 +28,10 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [BsonElement("role")]
-        [BsonRepresentation(BsonType.String)]
         public Role Role { get; set; }
 
         [BsonElement("isActive")]
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
 
         [BsonElement("groupId")]
         [BsonRepresentation(BsonType.ObjectId)]

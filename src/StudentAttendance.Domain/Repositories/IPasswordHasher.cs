@@ -1,8 +1,0 @@
-﻿namespace StudentAttendance.src.StudentAttendance.Domain.Repositories
-{
-    public interface IPasswordHasher
-    {
-        string Hash(string password);
-        bool Verify(string password, string hash);
-    }
-}

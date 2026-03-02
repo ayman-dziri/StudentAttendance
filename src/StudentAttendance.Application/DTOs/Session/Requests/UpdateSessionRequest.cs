@@ -8,8 +8,8 @@
 
     public string TeacherId { get; set; } = null!;
 
-    public string Group { get; set; } = null;
+    public string Group { get; set; } = null!;
 
-    public bool IsValidated { get; set; } = false;
+    public Boolean Statut { get; set; } = false;
 }
 

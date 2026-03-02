@@ -1,6 +1,4 @@
-﻿
-
-namespace StudentAttendance.src.StudentAttendance.Domain.Entities
+﻿namespace StudentAttendance.src.StudentAttendance.Domain.Entities
 {
     public class Session
     {
@@ -14,12 +12,16 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Entities
         public string TeacherId { get; set; } = null!;
 
         public string Group { get; set; } = null!;
-        public bool IsValidated { get; set; } = false;
+<<<<<<< HEAD
+<<<<<<< HEAD
 
-        public List<Absence> Absences { get; set; } = new();
+=======
+>>>>>>> origin/feature/scrum-19-conflit-horaire
+        public Boolean Statut { get; set; } = false;
+=======
 
+        public bool IsValidated { get; set; } = false; 
 
-
-
+>>>>>>> origin/feature/scrum-12-attendance-validation
     }
 }

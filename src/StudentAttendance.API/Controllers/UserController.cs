@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using StudentAttendance.src.StudentAttendance.Application.DTOs.user;
-using StudentAttendance.src.StudentAttendance.Application.Interfaces;
-using StudentAttendance.src.StudentAttendance.Application.Mappers;
+﻿using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Collections;
+using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
@@ -12,59 +9,22 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly StudentAttendanceDbContext _db;
 
-        public UserController(IUserService userService)
+        public UserController(StudentAttendanceDbContext db)
         {
-            _userService = userService;
+            _db = db;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest userRequest, CancellationToken ct)
+        public async Task<IActionResult> CreateUser([FromBody] User user, CancellationToken cancellationToken)
         {
-            await _userService.CreateUserAsync(userRequest, ct);
+            var collection = _db.GetCollection<User>(CollectionNames.Users);
 
-            return Created();
-        }
-
-        [HttpGet("users")]
-        public async Task<IActionResult> GetUsers(CancellationToken ct)
-        {
-            var users = await _userService.GetAllUsersAsync(ct);
-
-            return Ok(users);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser([FromRoute] string id , CancellationToken ct)
-        {
-            var user = await _userService.GetByIdAsync(id);
+            await collection.InsertOneAsync(user, cancellationToken: cancellationToken);
 
             return Ok(user);
         }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpadateUser([FromBody] UpdateUserRequest userRequest,
-                                                     [FromRoute] string id,
-                                                     CancellationToken ct)
-        {
-            await _userService.UpdateUserAsync(id, userRequest, ct);
-            return Ok(userRequest);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser([FromRoute]string id, CancellationToken ct)
-        {
-            await _userService.DeleteUserAsync(id, ct);
-            return Ok();
-        }
-
-        [HttpGet("users/{groupId}")]
-        public async Task<IActionResult> GetUsersByGroup([FromRoute] string groupId, CancellationToken ct)
-        {
-            var users = await _userService.GetStudentsByGroupAsync(groupId, ct);
-
-            return Ok(users);
-        }
     }
 }
+

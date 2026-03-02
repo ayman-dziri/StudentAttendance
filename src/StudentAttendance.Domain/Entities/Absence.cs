@@ -13,6 +13,8 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Entities
 
         public string StudentId { get; set; } = null!;
 
+        public string SessionId { get; set; } = null!;
+
         public DateTime? JustificationDate { get; set; }
     }
 }
