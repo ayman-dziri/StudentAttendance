@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using StudentAttendance.src.StudentAttendance.API.Constants;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
@@ -10,6 +12,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers;
 [Route("api/sessions")]
 [ApiController]
 [Produces("application/json")]
+[Authorize]
 public class SessionController : ControllerBase
 {
     private readonly ISessionsService _sessionsService;
@@ -25,7 +28,10 @@ public class SessionController : ControllerBase
     /// Récupère toutes les séances
     /// </summary>
     [HttpGet]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Teacher}")]
     [ProducesResponseType(typeof(List<SessionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<SessionResponse>>> GetAllSessionsAsync()
     {
@@ -45,7 +51,10 @@ public class SessionController : ControllerBase
     /// Récupère une séance par son identifiant
     /// </summary>
     [HttpGet("{id}", Name = "GetSessionById")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Teacher}")]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SessionResponse>> GetSessionByIdAsync(string id)
@@ -69,7 +78,10 @@ public class SessionController : ControllerBase
     /// Récupère les séances d'un professeur
     /// </summary>
     [HttpGet("teacher/{teacherId}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Teacher}")]
     [ProducesResponseType(typeof(List<SessionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<SessionResponse>>> GetSessionByTeacherIdAsync(string teacherId)
     {
@@ -89,7 +101,10 @@ public class SessionController : ControllerBase
     /// Récupère les séances d'un groupe
     /// </summary>
     [HttpGet("group/{group}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Teacher}")]
     [ProducesResponseType(typeof(List<SessionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<SessionResponse>>> GetSessionsByGroupName(string group)
     {
@@ -109,7 +124,10 @@ public class SessionController : ControllerBase
     /// Récupère les étudiants d'une séance
     /// </summary>
     [HttpGet("{sessionId}/students")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Teacher}")]
     [ProducesResponseType(typeof(List<User>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<User>>> GetStudentsBySessionIdAsync(string sessionId)
@@ -133,7 +151,10 @@ public class SessionController : ControllerBase
     /// Récupère le professeur d'une séance
     /// </summary>
     [HttpGet("{sessionId}/professor")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Teacher}")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<string>> GetProfessorBySessionIdAsync(string sessionId)
@@ -154,10 +175,13 @@ public class SessionController : ControllerBase
     }
 
     /// <summary>
-    /// Récupère les présences d'un étudiant avec les détails de chaque séance
+    /// Récupère les présences d'un étudiant
     /// </summary>
     [HttpGet("student/{studentId}/absences")]
+    [Authorize(Roles = Roles.Student)]
     [ProducesResponseType(typeof(List<StudentAttendanceDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetStudentAttendance([FromRoute] string studentId, CancellationToken ct)
     {
@@ -177,8 +201,11 @@ public class SessionController : ControllerBase
     /// Crée une nouvelle séance
     /// </summary>
     [HttpPost]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SessionResponse>> CreateSessionAsync([FromBody] CreateSessionRequest sessionrequest)
     {
@@ -200,9 +227,12 @@ public class SessionController : ControllerBase
     /// Met à jour une séance existante
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(SessionResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SessionResponse?>> UpdateSessionAsync(string id, [FromBody] UpdateSessionRequest sessionrequest)
     {
@@ -225,7 +255,10 @@ public class SessionController : ControllerBase
     /// Supprime une séance
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> DeleteSessionsAsync(string id)
@@ -245,12 +278,14 @@ public class SessionController : ControllerBase
 
     /// <summary>
     /// Justifie une absence d'un étudiant dans une séance
-    /// La séance doit être validée et le statut doit être ABSENT ou LATE
     /// </summary>
     [HttpPut("{sessionId}/absences/{studentId}/justify")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> JustifyAbsenceAsync(string sessionId, string studentId)
     {
@@ -276,12 +311,15 @@ public class SessionController : ControllerBase
     }
 
     /// <summary>
-    /// Met à jour le statut d'une absence d'un étudiant dans une séance
+    /// Met à jour le statut d'une absence d'un étudiant
     /// </summary>
     [HttpPatch("{sessionId}/absences/{studentId}")]
+    [Authorize(Roles = Roles.Teacher)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> UpdateAbsenceStatusAsync(string sessionId, string studentId, [FromBody] UpdateAbsenceStatusRequest request)
     {
@@ -312,9 +350,12 @@ public class SessionController : ControllerBase
     /// Met à jour le statut de plusieurs absences en une seule opération
     /// </summary>
     [HttpPatch("{sessionId}/absences")]
+    [Authorize(Roles = Roles.Teacher)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> UpdateAbsencesBulkAsync(string sessionId, [FromBody] List<UpdateAbsencesBulkItem> items)
     {
@@ -343,13 +384,14 @@ public class SessionController : ControllerBase
 
     /// <summary>
     /// Valide une séance et marque les absences des étudiants
-    /// Seul le professeur de la séance peut la valider
     /// </summary>
     [HttpPost("{sessionId}/validate")]
+    [Authorize(Roles = Roles.Teacher)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ValidateSessionAndMarkAbsences(
         [FromRoute] string sessionId,
