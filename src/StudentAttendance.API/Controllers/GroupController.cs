@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.API.Constants;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Group;
-using StudentAttendance.src.StudentAttendance.Application.Exceptions;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers;
@@ -42,36 +41,22 @@ public class GroupController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetGroupById(string id, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var group = await _groupService.GetGroupByIdAsync(id, cancellationToken);
-            return Ok(group);
-        }
-        catch (GroupNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+       var group = await _groupService.GetGroupByIdAsync(id, cancellationToken);
+        return Ok(group);
     }
 
     /// <summary>
     /// Récupère un groupe par son label
     /// </summary>
     [HttpGet("by-label/{label}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)] 
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetGroupByLabel(string label, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var group = await _groupService.GetGroupByLabelAsync(label, cancellationToken);
-            return Ok(group);
-        }
-        catch (GroupNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var group = await _groupService.GetGroupByLabelAsync(label, cancellationToken);
+        return Ok(group);
     }
 
     /// <summary>
@@ -85,15 +70,8 @@ public class GroupController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateGroup([FromBody] CreateGroupDto groupDto, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var createdGroup = await _groupService.CreateGroupAsync(groupDto, cancellationToken);
-            return CreatedAtAction(nameof(GetGroupById), new { id = createdGroup.Id }, createdGroup);
-        }
-        catch (DuplicateGroupException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var createdGroup = await _groupService.CreateGroupAsync(groupDto, cancellationToken);
+        return CreatedAtAction(nameof(GetGroupById), new { id = createdGroup.Id }, createdGroup);
     }
 
     /// <summary>
@@ -108,19 +86,8 @@ public class GroupController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateGroup(string id, [FromBody] UpdateGroupDto groupDto, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _groupService.UpdateGroupAsync(id, groupDto, cancellationToken);
-            return NoContent();
-        }
-        catch (GroupNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (DuplicateGroupException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        await _groupService.UpdateGroupAsync(id, groupDto, cancellationToken);
+        return NoContent();
     }
 
     /// <summary>
@@ -133,14 +100,7 @@ public class GroupController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteGroup(string id, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _groupService.DeleteGroupAsync(id, cancellationToken);
-            return NoContent();
-        }
-        catch (GroupNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        await _groupService.DeleteGroupAsync(id, cancellationToken);
+        return NoContent();
     }
 }
