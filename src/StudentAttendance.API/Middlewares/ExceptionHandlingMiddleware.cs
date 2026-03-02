@@ -42,6 +42,7 @@ public class ExceptionHandlingMiddleware
             GroupNotFoundException => (HttpStatusCode.NotFound, exception.Message),
             DuplicateGroupException => (HttpStatusCode.Conflict, exception.Message),
             InvalidCredentialsException => (HttpStatusCode.Unauthorized, exception.Message),
+            AccountDisabledException => (HttpStatusCode.Forbidden, exception.Message),
 
             InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
             ConflictScheduleException => (HttpStatusCode.Conflict, exception.Message),

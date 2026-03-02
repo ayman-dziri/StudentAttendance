@@ -34,7 +34,6 @@ public static class InfrastructureServiceRegistration
         // Auth
         // Token provider
         services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
-        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
 
         return services;
     }

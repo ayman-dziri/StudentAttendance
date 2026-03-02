@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Group;
-using StudentAttendance.src.StudentAttendance.Application.Exceptions;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
