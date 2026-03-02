@@ -21,5 +21,15 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
 
         [BsonElement("group")]
         public string Group { get; set; } = null!;
+
+        [BsonElement("IsValidated")]
+        public bool IsValidated { get; set; } = false;
+
+        [BsonElement("absences")]
+        public List<AbsenceDocument> Absences { get; set; } = new();
+
+      
+
+
     }
 }

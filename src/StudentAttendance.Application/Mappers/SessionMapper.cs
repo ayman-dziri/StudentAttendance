@@ -1,7 +1,9 @@
-﻿using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
+﻿using MongoDB.Bson;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Requests;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Session.Response;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Documents;
+
 
 namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
 
@@ -11,12 +13,14 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
     public static Session ToEntity(CreateSessionRequest dto) => new() 
 
     {
-        Id = Guid.NewGuid().ToString(), //copier simplement les propriétés.
+        Id = ObjectId.GenerateNewId().ToString(), //copier simplement les propriétés.
         StartTime = dto.StartTime,
         EndTime = dto.EndTime,
         TeacherId = dto.TeacherId,
         Group = dto.Group,
-        Statut = dto.Statut,
+        
+
+
     };
 
     //DTO updated -> Domain entité
@@ -26,19 +30,41 @@ namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
         session.EndTime = request.EndTime;
         session.TeacherId = request.TeacherId;
         session.Group = request.Group;
-        session.Statut = request.Statut;
+        session.IsValidated = request.IsValidated;
+        
+
     }
 
 
     //Entite -> Response DTO
-    public static SessionResponse ToResponse(Session session) => new() 
+    public static SessionResponse ToResponse(Session session) => new()
     {
         Id = session.Id,
         StartTime = session.StartTime,
         EndTime = session.EndTime,
         TeacherId = session.TeacherId,
         Group = session.Group,
-        Statut = session.Statut,
+        IsValidated = session.IsValidated,
+        Absences = session.Absences?
+         .Select(a => new AbsenceResponse
+         {
+             Id = a.Id,
+             StudentId = a.StudentId,
+             Status = a.Status,
+             JustificationDate = a.JustificationDate
+         })
+         .ToList() ?? new List<AbsenceResponse>()
+    };
+    //Domain -> Response DTO avec les absences
+    public static SessionResponse ToResponse(Session session, List<AbsenceResponse> absences) => new()
+    {
+        Id = session.Id,
+        StartTime = session.StartTime,
+        EndTime = session.EndTime,
+        TeacherId = session.TeacherId,
+        Group = session.Group,
+        IsValidated = session.IsValidated,
+        Absences = absences ?? new List<AbsenceResponse>()
     };
 }
     

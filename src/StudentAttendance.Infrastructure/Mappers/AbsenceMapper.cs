@@ -10,7 +10,6 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             Id = u.Id,
             Status = u.Status,
             StudentId = u.StudentId,
-            SessionId = u.SessionId,
             JustificationDate = u.JustificationDate,
         };
 
@@ -19,7 +18,6 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             Id = d.Id,
             Status = d.Status,
             StudentId = d.StudentId,
-            SessionId = d.SessionId,
             JustificationDate = d.JustificationDate,
         };
     }

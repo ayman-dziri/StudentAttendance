@@ -1,4 +1,4 @@
-using StudentAttendance.src.StudentAttendance.Application.DTOs.absence;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Absence;
 using StudentAttendance.src.StudentAttendance.Domain.Entities;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Mappers;
@@ -12,8 +12,7 @@ public static class AbsenceMapper
     {
         Id = absence.Id,
         StudentId = absence.StudentId,
-        SessionId = absence.SessionId,
-        Status = absence.Status.ToString(),
+        Status = absence.Status,
         JustificationDate = absence.JustificationDate
     };
 }
