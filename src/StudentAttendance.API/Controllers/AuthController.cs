@@ -4,10 +4,8 @@ using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Auth;
-using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
@@ -18,16 +16,16 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IJwtTokenProvider _jwtTokenProvider;
+        private readonly IRefreshTokenService _refreshTokenService;
         public sealed record SeedRefreshTokenRequest(string Email);
 
 
         //public AuthController(IAuthService auth, IJwtTokenProvider jwtTokenProvider ) => _auth = auth, _jwtTokenProvider = jwtTokenProvider;
 
-        public AuthController(IAuthService authService, IJwtTokenProvider jwtTokenProvider)
+        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService)
         {
             _authService = authService;
-            _jwtTokenProvider = jwtTokenProvider;
+            _refreshTokenService = refreshTokenService;
         }
         [HttpPost("login")]
         [AllowAnonymous]
@@ -42,7 +40,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         {
             try
             {
-                var result = await _authService.RefreshAsync(request.RefreshToken, ct);
+                var result = await _refreshTokenService.RefreshAsync(request.RefreshToken, ct);
                 return Ok(result);
             }
             catch (Exception ex)
