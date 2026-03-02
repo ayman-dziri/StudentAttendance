@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;  
 using Microsoft.OpenApi;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Infrastructure (MongoDB, Repositories)
@@ -98,7 +99,7 @@ if (string.IsNullOrWhiteSpace(jwt.Audience)) throw new InvalidOperationException
 
 Console.WriteLine($"JWT Issuer='{jwt.Issuer}', Audience='{jwt.Audience}', KeyLen={jwt.SigningKey.Length}");
 
-builder.Services
+/*builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -126,7 +127,7 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();*/
 
 
 builder.Services.AddCors(options =>
