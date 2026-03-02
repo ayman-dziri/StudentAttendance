@@ -6,13 +6,17 @@ using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Auth;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
 
-[ApiController]
-[Route("api/[controller]")]
-public sealed class AuthController : ControllerBase
+namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
+    [AllowAnonymous]
+    public class AuthController : ControllerBase
+    {
     private readonly IAuthService _authService;
     private readonly IJwtTokenProvider _jwtTokenProvider;
     public sealed record SeedRefreshTokenRequest(string Email);
+
     //public AuthController(IAuthService auth, IJwtTokenProvider jwtTokenProvider ) => _auth = auth, _jwtTokenProvider = jwtTokenProvider;
 
     public AuthController(IAuthService authService, IJwtTokenProvider jwtTokenProvider)
@@ -20,9 +24,13 @@ public sealed class AuthController : ControllerBase
         _authService = authService;
         _jwtTokenProvider = jwtTokenProvider;
     }
-
+    [HttpPost]
+    public async Task<ActionResult> Login([FromBody] LoginRequestDto login, CancellationToken cancellationToken = default)
+    {
+        var response = await _authService.LoginAsync(login, cancellationToken);
+        return Ok(response);
+    }
     [HttpPost("refresh")]
-    [AllowAnonymous]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken ct)
     {
         try
@@ -34,7 +42,7 @@ public sealed class AuthController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message, detail = ex.ToString() });
         }
-    }
+        }
 
     [HttpPost("logout")]
     [Authorize]

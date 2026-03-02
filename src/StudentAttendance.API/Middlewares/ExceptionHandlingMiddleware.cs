@@ -38,8 +38,13 @@ public class ExceptionHandlingMiddleware
 
             AbsenceNotFoundException => (HttpStatusCode.NotFound, exception.Message),
             AbsenceAlreadyJustifiedException => (HttpStatusCode.Conflict, exception.Message),
-            InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
 
+            GroupNotFoundException => (HttpStatusCode.NotFound, exception.Message),
+            DuplicateGroupException => (HttpStatusCode.Conflict, exception.Message),
+            InvalidCredentialsException => (HttpStatusCode.Unauthorized, exception.Message),
+            AccountDisabledException => (HttpStatusCode.Forbidden, exception.Message),
+
+            InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
             ConflictScheduleException => (HttpStatusCode.Conflict, exception.Message),
 
             FormatException => (HttpStatusCode.BadRequest, "L'identifiant fourni n'est pas valide"),

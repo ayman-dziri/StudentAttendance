@@ -1,88 +1,162 @@
 using Microsoft.Extensions.Options;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
+using StudentAttendance.src.StudentAttendance.Application.Exceptions;
 using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Auth;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
+using System.Security.Claims;
 
-public sealed class AuthService : IAuthService
+namespace StudentAttendance.src.StudentAttendance.Application.Services
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IJwtTokenProvider _jwtTokenProvider;
-    private readonly IRefreshTokenGenerator _refreshGen;
-    private readonly JwtOptions _jwtOptions;
-
-    public AuthService(
-        IUserRepository userRepository,
-        IJwtTokenProvider jwtTokenProvider,
-        IRefreshTokenGenerator refreshGen,
-        IOptions<JwtOptions> jwtOptions)
+    public sealed class AuthService : IAuthService
     {
-        _userRepository = userRepository;
-        _jwtTokenProvider = jwtTokenProvider;
-        _refreshGen = refreshGen;
-        _jwtOptions = jwtOptions.Value;
-    }
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtTokenProvider _jwtTokenProvider;
+        private readonly IRefreshTokenGenerator _refreshGen;
+        private readonly JwtOptions _jwtOptions;
+        private readonly ILogger<AuthService> _logger;
 
-    public async Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken ct = default)
-    {
-        var user = await _userRepository.GetUserByRefreshTokenAsync(refreshToken, ct);
-        if (user is null)
-            throw new UnauthorizedAccessException("Invalid refresh token.");
+        public AuthService(
+            IUserRepository userRepository,
+            IPasswordHasher passwordHasher,
+            IJwtTokenProvider jwtTokenProvider,
+            IRefreshTokenGenerator refreshGen,
+            IOptions<JwtOptions> jwtOptions,
+            ILogger<AuthService> logger)
+        {
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
+            _jwtTokenProvider = jwtTokenProvider;
+            _refreshGen = refreshGen;
+            _jwtOptions = jwtOptions.Value;
+            _logger = logger;
+        }
 
-        var now = DateTime.UtcNow;
-        if (!user.HasValidRefreshToken(refreshToken, now))
-            throw new UnauthorizedAccessException("Refresh token expired or revoked.");
+        // ---------------- LOGIN ----------------
+        public async Task<LoginResponseDto> LoginAsync(
+            LoginRequestDto login,
+            CancellationToken ct = default)
+        {
+            var user = await _userRepository.GetUserByEmailAsync(login.Email, ct);
+            if (user is null)
+            {
+                _logger.LogWarning("Echec de connexion pour {Email}", login.Email);
+                throw new InvalidCredentialsException();
+            }
 
-        // new access token
-        var descriptor = new JwtUserDescriptor(
-            user.Id,
-            user.Email,
-            new Dictionary<string, string> { ["role"] = user.Role.ToString() }
-        );
+            if (!_passwordHasher.Verify(login.Password, user.Password))
+            {
+                _logger.LogWarning("Echec de connexion pour {Email}", login.Email);
+                throw new InvalidCredentialsException();
+            }
 
-        var accessToken = _jwtTokenProvider.GenerateToken(descriptor);
-        var accessExp = now.AddMinutes(_jwtOptions.ExpMinuts);
+            if (!user.IsActive)
+            {
+                _logger.LogWarning("Compte désactivé pour {Email}", login.Email);
+                throw new AccountDisabledException();
+            }
 
-        // rotation refresh token
-        var newRefreshToken = _refreshGen.Generate();
-        var refreshExp = now.AddDays(7);
+            var now = DateTime.UtcNow;
 
-        user.SetRefreshToken(newRefreshToken, refreshExp);
+            // access token
+            var descriptor = new JwtUserDescriptor(
+                user.Id,
+                user.Email,
+                new Dictionary<string, string>
+                {
+                    [ClaimTypes.Role] = user.Role.ToString()
+                });
 
-        var ok = await _userRepository.UpdateRefreshTokenAsync(
-            user.Id,
-            user.RefreshToken,
-            user.RefreshTokenExpiresAt,
-            user.RefreshTokenRevokedAt,
-            ct);
+            var accessToken = _jwtTokenProvider.GenerateToken(descriptor);
 
-        if (!ok) throw new Exception("Could not update refresh token.");
+            // refresh token (généré automatiquement)
+            var refreshToken = _refreshGen.Generate();
+            var refreshExp = now.AddDays(7);
 
-        return new TokenResponse(accessToken, newRefreshToken, accessExp, refreshExp);
-    }
+            user.SetRefreshToken(refreshToken, refreshExp);
 
-    public async Task LogoutAsync(string userId, CancellationToken ct = default)
-    {
-        var user = await _userRepository.GetUserByIdAsync(userId, ct);
-        if (user is null) return;
+            await _userRepository.UpdateRefreshTokenAsync(
+                user.Id,
+                user.RefreshToken,
+                user.RefreshTokenExpiresAt,
+                user.RefreshTokenRevokedAt,
+                ct);
 
-        var now = DateTime.UtcNow;
+            _logger.LogInformation("Connexion réussie pour {Email}", login.Email);
 
-        // Variante A (recommandée) : révoquer + garder le token stocké (pour audit)
-        user.RevokeRefreshToken(now);
+            return new LoginResponseDto(
+                accessToken,
+                refreshToken,
+                now.AddMinutes(_jwtOptions.ExpMinuts),
+                refreshExp
+            );
+        }
 
-        // Variante B (plus strict) : supprimer le token complètement
-        // user.RefreshToken = null;
-        // user.RefreshTokenExpiresAt = null;
-        // user.RefreshTokenRevokedAt = now;
+        // ---------------- REFRESH TOKEN ----------------
+        public async Task<TokenResponse> RefreshAsync(
+            string refreshToken,
+            CancellationToken ct = default)
+        {
+            var user = await _userRepository.GetUserByRefreshTokenAsync(refreshToken, ct);
+            if (user is null)
+                throw new UnauthorizedAccessException("Invalid refresh token.");
 
-        await _userRepository.UpdateRefreshTokenAsync(
-            user.Id,
-            user.RefreshToken,
-            user.RefreshTokenExpiresAt,
-            user.RefreshTokenRevokedAt,
-            ct
-        );
+            var now = DateTime.UtcNow;
+
+            if (!user.HasValidRefreshToken(refreshToken, now))
+                throw new UnauthorizedAccessException("Refresh token expired or revoked.");
+
+            // new access token
+            var descriptor = new JwtUserDescriptor(
+                user.Id,
+                user.Email,
+                new Dictionary<string, string>
+                {
+                    [ClaimTypes.Role] = user.Role.ToString()
+                });
+
+            var newAccessToken = _jwtTokenProvider.GenerateToken(descriptor);
+            var accessExp = now.AddMinutes(_jwtOptions.ExpMinuts);
+
+            // refresh token rotation
+            var newRefreshToken = _refreshGen.Generate();
+            var refreshExp = now.AddDays(7);
+
+            user.SetRefreshToken(newRefreshToken, refreshExp);
+
+            await _userRepository.UpdateRefreshTokenAsync(
+                user.Id,
+                user.RefreshToken,
+                user.RefreshTokenExpiresAt,
+                user.RefreshTokenRevokedAt,
+                ct);
+
+            return new TokenResponse(
+                newAccessToken,
+                newRefreshToken,
+                accessExp,
+                refreshExp
+            );
+        }
+
+        // ---------------- LOGOUT ----------------
+        public async Task LogoutAsync(
+            string userId,
+            CancellationToken ct = default)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId, ct);
+            if (user is null) return;
+
+            user.RevokeRefreshToken(DateTime.UtcNow);
+
+            await _userRepository.UpdateRefreshTokenAsync(
+                user.Id,
+                user.RefreshToken,
+                user.RefreshTokenExpiresAt,
+                user.RefreshTokenRevokedAt,
+                ct);
+        }
     }
 }

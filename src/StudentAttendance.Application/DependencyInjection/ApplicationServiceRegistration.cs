@@ -9,11 +9,12 @@ namespace StudentAttendance.src.StudentAttendance.Application.DependencyInjectio
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<Interfaces.IGroupService, Services.GroupService>();
+            services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISessionsService, SessionsService>();
             services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
             services.AddScoped<IAuthService, AuthService>();
+
             return services;
         }
     }
