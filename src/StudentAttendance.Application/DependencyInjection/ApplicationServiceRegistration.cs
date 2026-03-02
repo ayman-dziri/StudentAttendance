@@ -13,7 +13,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.DependencyInjectio
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISessionsService, SessionsService>();
             services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
-
+            services.AddScoped<IAuthService, AuthService>();
             return services;
         }
     }

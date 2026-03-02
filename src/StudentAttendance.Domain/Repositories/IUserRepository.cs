@@ -11,5 +11,13 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Interfaces
         Task<bool> DeleteUserAsync(string id, CancellationToken ct = default);
         Task<User?> GetUserByEmailAsync(string email, CancellationToken ct = default);
         Task<List<User>> GetStudentsByGroupIdAsync(string groupId, CancellationToken ct = default);
+        Task<User?> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken ct = default);
+        Task<bool> UpdateRefreshTokenAsync(
+            string userId,
+            string? refreshToken,
+            DateTime? expiresAtUtc,
+            DateTime? revokedAtUtc,
+            CancellationToken ct = default
+        );
     }
 }

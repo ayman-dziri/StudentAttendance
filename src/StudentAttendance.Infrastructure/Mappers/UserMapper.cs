@@ -17,6 +17,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             Role = u.Role,
             IsActive = u.IsActive,
             GroupId = u.GroupId,
+            RefreshToken = u.RefreshToken,
+            RefreshTokenExpiresAt = u.RefreshTokenExpiresAt,
+            RefreshTokenRevokedAt = u.RefreshTokenRevokedAt,
         };
 
         public static User ToDomain(UserDocument d) => new()
@@ -31,6 +34,9 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Mappers
             Role = d.Role,
             IsActive = d.IsActive,
             GroupId = d.GroupId,
+            RefreshToken = d.RefreshToken,
+            RefreshTokenExpiresAt = d.RefreshTokenExpiresAt,
+            RefreshTokenRevokedAt = d.RefreshTokenRevokedAt,
         };
     }
 }

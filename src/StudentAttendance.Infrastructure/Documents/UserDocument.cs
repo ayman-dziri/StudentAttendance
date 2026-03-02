@@ -37,5 +37,14 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Documents
         [BsonElement("groupId")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? GroupId { get; set; }
+
+        [BsonElement("refreshToken")]
+        public string? RefreshToken { get; set; }
+
+        [BsonElement("refreshTokenExpiresAt")]
+        public DateTime? RefreshTokenExpiresAt { get; set; }
+
+        [BsonElement("refreshTokenRevokedAt")]
+        public DateTime? RefreshTokenRevokedAt { get; set; }
     }
 }

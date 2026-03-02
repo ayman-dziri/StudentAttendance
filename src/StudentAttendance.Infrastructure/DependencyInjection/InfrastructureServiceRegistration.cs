@@ -5,7 +5,7 @@ using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Providers;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-
+using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
 /// <summary>
@@ -25,6 +25,8 @@ public static class InfrastructureServiceRegistration
 
         services.AddSingleton<MongoDbContext>();
 
+        //Refresh token generator(j'ai choisi Singleton car il n'a pas d'état "Stateless" et peut être partagé)
+        services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         // Repositories
         services.AddScoped<ISessionsRepository, SessionsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
@@ -40,7 +42,6 @@ public static class InfrastructureServiceRegistration
         // Auth
         // Token provider
         services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
-
 
         return services;
     }
