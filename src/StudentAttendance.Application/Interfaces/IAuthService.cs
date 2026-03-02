@@ -7,5 +7,6 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
         Task<LoginResponseDto> LoginAsync(LoginRequestDto login, CancellationToken cancellationToken = default);
         Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken ct = default);
         Task LogoutAsync(string userId, CancellationToken ct = default);
-         }
+        Task InvalidateAllAsync(string userId, CancellationToken ct = default);
+    }
 }

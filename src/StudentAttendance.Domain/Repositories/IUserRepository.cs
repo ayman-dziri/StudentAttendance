@@ -19,5 +19,6 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Interfaces
             DateTime? revokedAtUtc,
             CancellationToken ct = default
         );
+        Task<bool> InvalidateAllAsync(string userId, CancellationToken ct = default);
     }
 }

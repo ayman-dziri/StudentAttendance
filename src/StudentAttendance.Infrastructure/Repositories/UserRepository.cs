@@ -9,7 +9,7 @@ using StudentAttendance.src.StudentAttendance.Infrastructure.Mappers;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository :   IUserRepository
     {
         public readonly IMongoCollection<UserDocument> _collection;
 
@@ -124,6 +124,24 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             );
 
             return result.MatchedCount > 0 && result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> InvalidateAllAsync(string userId, CancellationToken ct = default)
+        {
+            var now = DateTime.UtcNow;
+
+            var update = Builders<UserDocument>.Update
+                .Set(x => x.RefreshTokenRevokedAt, now)
+                .Set(x => x.RefreshToken, null)
+                .Set(x => x.RefreshTokenExpiresAt, null);
+
+            var result = await _collection.UpdateOneAsync(
+                x => x.Id == userId,
+                update,
+                cancellationToken: ct
+            );
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
     }
 }

@@ -37,33 +37,60 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
         }
 
         // ---------------- LOGIN ----------------
-        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto login, CancellationToken cancellationToken = default)
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto login, CancellationToken ct = default)
         {
-            var user = await _userRepository.GetUserByEmailAsync(login.Email, cancellationToken);
+            var user = await _userRepository.GetUserByEmailAsync(login.Email, ct);
             if (user is null)
             {
                 _logger.LogWarning("Echec de connexion pour {Email}", login.Email);
                 throw new InvalidCredentialsException();
             }
+
             var isPasswordValid = _passwordHasher.Verify(login.Password, user.Password);
             if (!isPasswordValid)
             {
                 _logger.LogWarning("Echec de connexion pour {Email}", login.Email);
                 throw new InvalidCredentialsException();
             }
+
             if (!user.IsActive)
             {
                 _logger.LogWarning("Compte desactive pour {Email}", login.Email);
                 throw new AccountDisabledException();
             }
+
+            var now = DateTime.UtcNow;
+
+            // access token
+            var descriptor = new JwtUserDescriptor(
+                user.Id,
+                user.Email,
+                new Dictionary<string, string>
+                {
+                    [ClaimTypes.Role] = user.Role.ToString()
+                });
+
+            var accessToken = _jwtTokenProvider.GenerateToken(descriptor);
+            var accessExp = now.AddMinutes(_jwtOptions.ExpMinuts);
+
+            // refresh token (création de session)
+            var refreshToken = _refreshGen.Generate();
+            var refreshExp = now.AddDays(7);
+
+            user.SetRefreshToken(refreshToken, refreshExp);
+
+            var ok = await _userRepository.UpdateRefreshTokenAsync(
+                user.Id,
+                user.RefreshToken,
+                user.RefreshTokenExpiresAt,
+                user.RefreshTokenRevokedAt,
+                ct);
+
+            if (!ok) throw new Exception("Could not persist refresh token on login.");
+
             _logger.LogInformation("Connexion reussie pour {Email}", login.Email);
-            var claims = new Dictionary<string, string>
-            {
-                [ClaimTypes.Role] = user.Role.ToString()
-            };
-            var descriptor = new JwtUserDescriptor(user.Id, user.Email, claims);
-            string token = _jwtTokenProvider.GenerateToken(descriptor);
-            return new LoginResponseDto(token);
+
+            return new LoginResponseDto(accessToken, refreshToken, accessExp, refreshExp);
         }
 
 
@@ -82,7 +109,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             var descriptor = new JwtUserDescriptor(
                 user.Id,
                 user.Email,
-                new Dictionary<string, string> { ["role"] = user.Role.ToString() }
+                new Dictionary<string, string> { ["role"] = user.Role.ToString()}
             );
 
             var accessToken = _jwtTokenProvider.GenerateToken(descriptor);
@@ -129,6 +156,11 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
                 user.RefreshTokenRevokedAt,
                 ct
             );
+        }
+        // ---------------- INVALIDATE ALL  ----------------
+        public async Task InvalidateAllAsync(string userId, CancellationToken ct = default)
+        {
+            await _userRepository.InvalidateAllAsync(userId, ct);
         }
     }
 }

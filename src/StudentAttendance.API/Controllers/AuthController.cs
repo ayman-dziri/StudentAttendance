@@ -5,9 +5,14 @@ using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Interfaces;
 using StudentAttendance.src.StudentAttendance.Domain.Auth;
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -16,6 +21,7 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         private readonly IJwtTokenProvider _jwtTokenProvider;
         public sealed record SeedRefreshTokenRequest(string Email);
 
+
         //public AuthController(IAuthService auth, IJwtTokenProvider jwtTokenProvider ) => _auth = auth, _jwtTokenProvider = jwtTokenProvider;
 
         public AuthController(IAuthService authService, IJwtTokenProvider jwtTokenProvider)
@@ -23,10 +29,11 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
             _authService = authService;
             _jwtTokenProvider = jwtTokenProvider;
         }
-        [HttpPost]
-        public async Task<ActionResult> Login([FromBody] LoginRequestDto login, CancellationToken cancellationToken = default)
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult> Login([FromBody] LoginRequestDto login, CancellationToken ct = default)
         {
-            var response = await _authService.LoginAsync(login, cancellationToken);
+            var response = await _authService.LoginAsync(login, ct);
             return Ok(response);
         }
         [HttpPost("refresh")]
@@ -48,11 +55,16 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         [Authorize]
         public async Task<IActionResult> Logout(CancellationToken ct)
         {
-            var userId = User.FindFirst("sub")?.Value;
+            var userId =
+                User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                ?? User.FindFirstValue("sub")
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
 
             await _authService.LogoutAsync(userId, ct);
             return NoContent();
         }
+
     }
 }
