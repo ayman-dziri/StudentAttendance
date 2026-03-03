@@ -7,6 +7,8 @@ using StudentAttendance.src.StudentAttendance.Domain.Auth;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth.Requests;
+
 
 namespace StudentAttendance.src.StudentAttendance.API.Controllers
 {
@@ -19,13 +21,20 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
         private readonly IRefreshTokenService _refreshTokenService;
         public sealed record SeedRefreshTokenRequest(string Email);
 
+                private readonly ICurrentUserService _currentUserService;
+                        private readonly IUserService _userService;
+
+
+
 
         //public AuthController(IAuthService auth, IJwtTokenProvider jwtTokenProvider ) => _auth = auth, _jwtTokenProvider = jwtTokenProvider;
 
-        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService)
+        public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService, ICurrentUserService currentUserService, IUserService userService)
         {
             _authService = authService;
             _refreshTokenService = refreshTokenService;
+            _currentUserService = currentUserService;
+            _userService = userService;
         }
         [HttpPost("login")]
         [AllowAnonymous]
@@ -62,6 +71,46 @@ namespace StudentAttendance.src.StudentAttendance.API.Controllers
 
             await _authService.LogoutAsync(userId, ct);
             return NoContent();
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = _currentUserService.GetCurrentUserId();
+
+            var user = await _userService.GetByIdAsync(userId);
+
+            
+            
+            if (user is null)
+            {
+                return NotFound();
+            }
+            
+            
+                return Ok(new
+                {
+                    user.Id,
+                    user.Email,
+                    user.FirstName,
+                    user.LastName,
+                    user.Role
+                });
+            
+        }
+
+         
+        [HttpPost("ChangePassword")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+        var userId = _currentUserService.GetCurrentUserId();
+        await _authService.ChangePasswordAsync(userId, request);
+        return Ok(new
+        {
+            message = "Password changed successfull"
+        });
         }
 
     }

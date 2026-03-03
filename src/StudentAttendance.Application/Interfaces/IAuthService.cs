@@ -1,5 +1,6 @@
 
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth.Requests;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 {

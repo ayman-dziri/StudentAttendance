@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
-using StudentAttendanceV2.src.StudentAttendance.Application.Interfaces;
+using StudentAttendance.src.StudentAttendance.Application.Interfaces;
 
-namespace StudentAttendanceV2.src.StudentAttendance.Application.Services;
+namespace StudentAttendance.src.StudentAttendance.Application.Services;
 
     public class CurrentUserService : ICurrentUserService
     {

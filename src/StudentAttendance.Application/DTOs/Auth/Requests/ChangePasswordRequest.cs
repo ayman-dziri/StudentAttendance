@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace StudentAttendanceV2.src.StudentAttendance.Application.DTOs.Auth.Requests
+namespace StudentAttendance.src.StudentAttendance.Application.DTOs.Auth.Requests
 {
     public class ChangePasswordRequest
     {   

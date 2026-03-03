@@ -1,4 +1,4 @@
-namespace StudentAttendanceV2.src.StudentAttendance.Application.Interfaces
+namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
 {
     public interface ICurrentUserService
     {

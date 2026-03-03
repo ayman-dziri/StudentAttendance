@@ -8,6 +8,7 @@ using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
 using StudentAttendance.src.StudentAttendance.Domain.Repositories;
 
 using System.Security.Claims;
+using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth.Requests;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Services
 {
