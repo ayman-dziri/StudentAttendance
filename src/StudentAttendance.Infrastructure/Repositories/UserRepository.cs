@@ -57,6 +57,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 .Set(x => x.FirstName, document.FirstName)
                 .Set(x => x.LastName, document.LastName)
                 .Set(x => x.BirthDate, document.BirthDate)
+                .Set(x => x.Password, document.Password)
                 .Set(x => x.GroupId, document.GroupId);
 
             var result = await _collection.UpdateOneAsync(
@@ -65,7 +66,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
                 cancellationToken: ct
             );
 
-            return result.MatchedCount > 0 && result.ModifiedCount > 0;
+           return result.MatchedCount > 0 && result.ModifiedCount > 0;
         }
         public async Task<bool> DeleteUserAsync(string id, CancellationToken ct = default)
         {

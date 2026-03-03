@@ -7,7 +7,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services;
     public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor ;
-        private const string UserIdClaim = JwtRegisteredClaimNames.Sub;
+       private const string UserIdClaim = ClaimTypes.NameIdentifier;
 
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
         {
