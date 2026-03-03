@@ -29,7 +29,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
             IRefreshTokenGenerator refreshGen,
             IRefreshTokenService refreshTokenService,
             IOptions<JwtOptions> jwtOptions,
-            
+
             ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
@@ -68,7 +68,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
 
             // access token
             var descriptor = new JwtUserDescriptor(
-                user.Id,
+                user.Id.ToString(),
                 user.Email,
                 new Dictionary<string, string>
                 {
@@ -99,7 +99,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
         }
 
 
-        
+
 
         // ---------------- LOGOUT ----------------
         public async Task LogoutAsync(string userId, CancellationToken ct = default)
@@ -125,59 +125,59 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
                 ct
             );
         }
-        
+
         // ------------------- Change Password ------------------------
-        
+
         public async Task ChangePasswordAsync(
     string userId,
     ChangePasswordRequest request,
     CancellationToken cancellationToken = default)
-{
-    ArgumentNullException.ThrowIfNull(request);
+        {
+            ArgumentNullException.ThrowIfNull(request);
 
-    // Récupération utilisateur
-    var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
-    if (user is null)
-    {
-        throw new KeyNotFoundException($"User with Id '{userId}' not found.");
-    }
+            // Récupération utilisateur
+            var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
+            if (user is null)
+            {
+                throw new KeyNotFoundException($"User with Id '{userId}' not found.");
+            }
 
-    // Vérification ancien mot de passe
-    var isOldPasswordValid = _passwordHasher.Verify(request.OldPassword, user.Password);
-    if (!isOldPasswordValid)
-    {
-        throw new UnauthorizedAccessException("Old password is incorrect.");
-    }
+            // Vérification ancien mot de passe
+            var isOldPasswordValid = _passwordHasher.Verify(request.OldPassword, user.Password);
+            if (!isOldPasswordValid)
+            {
+                throw new UnauthorizedAccessException("Old password is incorrect.");
+            }
 
-    // Vérifier que le nouveau mot de passe est différent
-    var isSamePassword = _passwordHasher.Verify(request.NewPassword, user.Password);
-    if (isSamePassword)
-    {
-        throw new InvalidOperationException("New password must be different from the old password.");
-    }
+            // Vérifier que le nouveau mot de passe est différent
+            var isSamePassword = _passwordHasher.Verify(request.NewPassword, user.Password);
+            if (isSamePassword)
+            {
+                throw new InvalidOperationException("New password must be different from the old password.");
+            }
 
-    // Validation du nouveau mot de passe
-    if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
-    {
-        throw new ArgumentException("New password must be at least 8 characters long.");
-    }
+            // Validation du nouveau mot de passe
+            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+            {
+                throw new ArgumentException("New password must be at least 8 characters long.");
+            }
 
-    // Hash du nouveau mot de passe via abstraction
-    var newHashedPassword = _passwordHasher.Hash(request.NewPassword);
+            // Hash du nouveau mot de passe via abstraction
+            var newHashedPassword = _passwordHasher.Hash(request.NewPassword);
 
-    user.Password = newHashedPassword;
+            user.Password = newHashedPassword;
 
-    var updateSuccess = await _userRepository.UpdateUserAsync(user.Id, user, cancellationToken);
-    if (!updateSuccess)
-    {
-        throw new InvalidOperationException("Failed to update user password. Please try again.");
-    }
+            var updateSuccess = await _userRepository.UpdateUserAsync(user.Id, user, cancellationToken);
+            if (!updateSuccess)
+            {
+                throw new InvalidOperationException("Failed to update user password. Please try again.");
+            }
 
-    // Invalidation de toutes les sessions (refresh tokens)
-    await _refreshTokenService.InvalidateAllAsync(userId);
-}
-      
-        
+            // Invalidation de toutes les sessions (refresh tokens)
+            await _refreshTokenService.InvalidateAllAsync(userId);
+        }
+
+
 
     }
 }
