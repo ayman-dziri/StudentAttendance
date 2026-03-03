@@ -1,3 +1,4 @@
+
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces

@@ -74,6 +74,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
         public async Task InvalidateAllAsync(string userId, CancellationToken ct = default)
         {
             await _userRepository.InvalidateAllAsync(userId, ct);
+
         }
     }
 }

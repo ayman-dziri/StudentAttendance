@@ -19,19 +19,23 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
         private readonly IRefreshTokenGenerator _refreshGen;
         private readonly JwtOptions _jwtOptions;
         private readonly ILogger<AuthService> _logger;
+        private readonly IRefreshTokenService _refreshTokenService;
 
         public AuthService(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
             IJwtTokenProvider jwtTokenProvider,
             IRefreshTokenGenerator refreshGen,
+            IRefreshTokenService refreshTokenService,
             IOptions<JwtOptions> jwtOptions,
+            
             ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _jwtTokenProvider = jwtTokenProvider;
             _refreshGen = refreshGen;
+            _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
             _jwtOptions = jwtOptions.Value;
             _logger = logger;
         }
@@ -120,6 +124,59 @@ namespace StudentAttendance.src.StudentAttendance.Application.Services
                 ct
             );
         }
+        
+        // ------------------- Change Password ------------------------
+        
+        public async Task ChangePasswordAsync(
+    string userId,
+    ChangePasswordRequest request,
+    CancellationToken cancellationToken = default)
+{
+    ArgumentNullException.ThrowIfNull(request);
+
+    // Récupération utilisateur
+    var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
+    if (user is null)
+    {
+        throw new KeyNotFoundException($"User with Id '{userId}' not found.");
+    }
+
+    // Vérification ancien mot de passe
+    var isOldPasswordValid = _passwordHasher.Verify(request.OldPassword, user.Password);
+    if (!isOldPasswordValid)
+    {
+        throw new UnauthorizedAccessException("Old password is incorrect.");
+    }
+
+    // Vérifier que le nouveau mot de passe est différent
+    var isSamePassword = _passwordHasher.Verify(request.NewPassword, user.Password);
+    if (isSamePassword)
+    {
+        throw new InvalidOperationException("New password must be different from the old password.");
+    }
+
+    // Validation du nouveau mot de passe
+    if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+    {
+        throw new ArgumentException("New password must be at least 8 characters long.");
+    }
+
+    // Hash du nouveau mot de passe via abstraction
+    var newHashedPassword = _passwordHasher.Hash(request.NewPassword);
+
+    user.Password = newHashedPassword;
+
+    var updateSuccess = await _userRepository.UpdateUserAsync(user.Id, user, cancellationToken);
+    if (!updateSuccess)
+    {
+        throw new InvalidOperationException("Failed to update user password. Please try again.");
+    }
+
+    // Invalidation de toutes les sessions (refresh tokens)
+    await _refreshTokenService.InvalidateAllAsync(userId);
+}
+      
+        
 
     }
 }

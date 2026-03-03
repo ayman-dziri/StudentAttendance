@@ -1,3 +1,4 @@
+
 using StudentAttendance.src.StudentAttendance.Application.DTOs.Auth;
 
 namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
@@ -6,5 +7,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.Interfaces
     {
         Task<LoginResponseDto> LoginAsync(LoginRequestDto login, CancellationToken cancellationToken = default);
         Task LogoutAsync(string userId, CancellationToken ct = default);
+        Task ChangePasswordAsync(string userId , ChangePasswordRequest request , CancellationToken cancellationToken = default);
     } 
 }
+

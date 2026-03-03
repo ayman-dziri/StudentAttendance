@@ -158,9 +158,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("SwaggerCors");
 
 
+
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 await app.RunAsync();
