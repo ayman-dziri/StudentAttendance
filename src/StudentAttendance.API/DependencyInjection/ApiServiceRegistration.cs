@@ -101,11 +101,10 @@ public static class ApiServiceRegistration
     /// </summary>
     private static IServiceCollection AddApiDocumentation(this IServiceCollection services)
     {
-        services.AddOpenApi();
+        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         return services;
     }
-
     /// <summary>
     /// Configure la politique CORS
     /// </summary>

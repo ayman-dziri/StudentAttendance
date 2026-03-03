@@ -25,12 +25,36 @@ namespace StudentAttendance.src.StudentAttendance.Domain.Entities
 
         public string? GroupId { get; set; }
 
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiresAt { get; set; }
+        public DateTime? RefreshTokenRevokedAt { get; set; }
 
         public void GenerateEmail() // generer un email automatiquement en concatenant le nom + .prenom + .@Winity-artner.com
         {
             var domain = "@Winity-Partner.com";
             var UpperLastname = LastName.ToUpper();
             Email = $"{FirstName}.{UpperLastname}.{domain}";
+        }
+
+        public bool HasValidRefreshToken(string token, DateTime nowUtc)
+        {
+            if (RefreshToken is null || RefreshTokenExpiresAt is null) return false;
+            if (RefreshTokenRevokedAt is not null) return false;
+            if (!string.Equals(RefreshToken, token, StringComparison.Ordinal)) return false;
+
+            return RefreshTokenExpiresAt.Value > nowUtc;
+        }
+
+        public void SetRefreshToken(string token, DateTime expiresAtUtc)
+        {
+            RefreshToken = token;
+            RefreshTokenExpiresAt = expiresAtUtc;
+            RefreshTokenRevokedAt = null;
+        }
+
+        public void RevokeRefreshToken(DateTime nowUtc)
+        {
+            RefreshTokenRevokedAt = nowUtc;
         }
     }
 }

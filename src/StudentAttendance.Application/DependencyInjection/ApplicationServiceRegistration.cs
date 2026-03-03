@@ -11,7 +11,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.DependencyInjectio
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<Interfaces.IGroupService, Services.GroupService>();
+            services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISessionsService, SessionsService>();
             services.AddScoped<ISessionConflictValidator, SessionConflictValidator>();
@@ -19,6 +19,7 @@ namespace StudentAttendance.src.StudentAttendance.Application.DependencyInjectio
             services.AddScoped<ICurrentUserService , CurrentUserService>();
             services.AddScoped<IAuthService , AuthService>();
 
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             return services;
         }
     }

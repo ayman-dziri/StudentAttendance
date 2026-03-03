@@ -9,7 +9,7 @@ using StudentAttendance.src.StudentAttendance.Infrastructure.Mappers;
 
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository :   IUserRepository
     {
         public readonly IMongoCollection<UserDocument> _collection;
 
@@ -24,7 +24,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             await _collection.InsertOneAsync(document, cancellationToken: ct);
         }
 
-        public async Task<User?> GetUserByIdAsync(string id,  CancellationToken ct = default)
+        public async Task<User?> GetUserByIdAsync(string id, CancellationToken ct = default)
         {
             var document = await _collection.Find(x => x.Id == id).FirstOrDefaultAsync(ct); // on cherche l'objet si son id == l'id entré dans le parametre
 
@@ -76,7 +76,7 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
         public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct = default)
         {
             var user = await _collection.Find(x => x.Email == email).FirstOrDefaultAsync(ct);
-
+            if (user is null) return null;
             return UserMapper.ToDomain(user);
         }
 
@@ -91,6 +91,57 @@ namespace StudentAttendance.src.StudentAttendance.Infrastructure.Repositories
             var results =  users.Select(UserMapper.ToDomain).ToList(); // on retournant la liste des users en les mappant de document vers entités
             Console.WriteLine("Etudiants by Group : ", results);
             return results;
+        }
+
+        public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken ct = default)
+        {
+            var document = await _collection
+                .Find(x => x.RefreshToken == refreshToken)
+                .FirstOrDefaultAsync(ct);
+
+            if (document is null) return null;
+            return UserMapper.ToDomain(document);
+            Console.WriteLine($"[Refresh] Looking for token: '{refreshToken}'");
+        }
+
+        public async Task<bool> UpdateRefreshTokenAsync(
+            string userId,
+            string? refreshToken,
+            DateTime? expiresAtUtc,
+            DateTime? revokedAtUtc,
+            CancellationToken ct = default
+        )
+        {
+            var update = Builders<UserDocument>.Update
+                .Set(x => x.RefreshToken, refreshToken)
+                .Set(x => x.RefreshTokenExpiresAt, expiresAtUtc)
+                .Set(x => x.RefreshTokenRevokedAt, revokedAtUtc);
+
+            var result = await _collection.UpdateOneAsync(
+                x => x.Id == userId,
+                update,
+                cancellationToken: ct
+            );
+
+            return result.MatchedCount > 0 && result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> InvalidateAllAsync(string userId, CancellationToken ct = default)
+        {
+            var now = DateTime.UtcNow;
+
+            var update = Builders<UserDocument>.Update
+                .Set(x => x.RefreshTokenRevokedAt, now)
+                .Set(x => x.RefreshToken, null)
+                .Set(x => x.RefreshTokenExpiresAt, null);
+
+            var result = await _collection.UpdateOneAsync(
+                x => x.Id == userId,
+                update,
+                cancellationToken: ct
+            );
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
     }
 }
