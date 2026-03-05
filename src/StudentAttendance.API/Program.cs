@@ -14,14 +14,44 @@ using System.Text.Json.Serialization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;  
+using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.WithProperty("application", "StudentAttendance")
+    .WriteTo.Console()
+    .WriteTo.GrafanaLoki("http://my-loki:3100")
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
+
+
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(t =>
+    {
+        t.AddAspNetCoreInstrumentation();
+        t.SetSampler(new AlwaysOnSampler());
+
+        t.AddZipkinExporter(o => o.Endpoint = new Uri("http://my-tempo:9411/api/v2/spans"));
+    })
+    .WithMetrics(m =>
+    {
+        m.AddAspNetCoreInstrumentation();
+        m.AddRuntimeInstrumentation();
+        m.AddProcessInstrumentation();
+        m.AddPrometheusExporter();
+    });
+
 
 // Infrastructure (MongoDB, Repositories)
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication();
 // Config JWT
 //builder.Services.AddJwtOptions(builder.Configuration);
 
@@ -99,35 +129,7 @@ if (string.IsNullOrWhiteSpace(jwt.Audience)) throw new InvalidOperationException
 
 Console.WriteLine($"JWT Issuer='{jwt.Issuer}', Audience='{jwt.Audience}', KeyLen={jwt.SigningKey.Length}");
 
-/*builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.IncludeErrorDetails = true;
 
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwt.Issuer,
-            ValidAudience = jwt.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
-            ClockSkew = TimeSpan.FromSeconds(30)
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = ctx =>
-            {
-                Console.WriteLine("JWT AUTH FAILED: " + ctx.Exception.Message);
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-builder.Services.AddAuthorization();*/
 
 
 builder.Services.AddCors(options =>
@@ -137,6 +139,17 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
+
+//Health Checks ----------> Like Spring Boot Actuator Package 
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+
+
+
+
+
+
 
 var app = builder.Build();
 
@@ -159,8 +172,19 @@ app.UseCors("SwaggerCors");
 
 
 
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
+
+
+//endpoints
+
+app.MapHealthChecks("/health");
+app.MapPrometheusScrapingEndpoint("/metrics");
+
+app.MapGet("/ping", () =>
+{
+    Log.Information("Ping called - test Loki ingestion");
+    return Results.Ok("ok");
+});
+
 
 await app.RunAsync();

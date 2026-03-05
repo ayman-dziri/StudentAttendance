@@ -1,0 +1,63 @@
+services:
+
+
+  my-prometheus:
+    image: prom/prometheus
+    container_name: mprometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+
+  ## Tempo
+  my-tempo:
+    image: grafana/tempo
+    container_name: mtempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
+      - ./docker/tempo/tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200" # Tempo
+      - "9411:9411" # zipkin
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3200/ready" ]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+
+
+  my-loki:
+    image: grafana/loki:main
+    container_name: mloki
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    ports:
+      - "3100:3100"
+
+
+  my-grafana:
+    image: grafana/grafana
+    container_name: mgrafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+
+
+
+  attendance-service:
+    build: ./
+    container_name: attendance-service
+    depends_on:
+      - my-tempo
+      - my-loki
+    restart: always
+    ports:
+      - "8083:8083"
+    

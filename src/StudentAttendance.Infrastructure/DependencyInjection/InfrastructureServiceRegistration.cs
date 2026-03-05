@@ -6,7 +6,7 @@ using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Data;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Providers;
 using StudentAttendance.src.StudentAttendance.Infrastructure.Repositories;
-using StudentAttendance.src.StudentAttendance.Infrastructure.Auth;
+
 namespace StudentAttendance.src.StudentAttendance.Infrastructure.DependencyInjection;
 
 /// <summary>
